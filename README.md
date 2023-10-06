@@ -25,6 +25,9 @@ Standard DOM Architecture:
 ## Wireframes
 
 ![Initialize](./0-Initialize.png)
+![Select Letters](./1-select-letters.png)
+![First Play](./2-first-play.png)
+![Second Play](./3-second-play.png)
 
 
 
