@@ -24,7 +24,7 @@ Standard DOM Architecture:
 
 ## Wireframes
 
-![Initialize](https://drive.google.com/file/d/15QhPSaf3TEC7XC9OAbOL1BLoGKkZ0GSh/view?usp=sharing)
+![Initialize](./0-Initialize.png)
 
 
 
