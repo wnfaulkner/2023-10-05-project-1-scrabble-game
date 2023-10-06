@@ -69,6 +69,7 @@ Standard DOM Architecture:
 ## Stretch Goals
 
 **Game Setup**
+* Scoring calculation includes double/triple letter and double/triple word bonuses
 * Allow three & four players (MVP will be set up for only two players)
 * Players can select their own player names
 * Letter 'bag' includes two blank 'wild cards'; when placed on the board during a play, a pop-up will allow the player to choose the letter to which the blank is assigned. Once chosen, the letter will render differently (lighter color text) to indicate they were wild cards and do not count for any points.
