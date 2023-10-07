@@ -31,7 +31,7 @@
         // Blank tile (used as a wildcard)
         //_: {count: 2, points: 0},
     };
-    
+
     // Example usage:
         //   console.log(scrabbleTiles.E); // Output: { count: 12, points: 1 }
         //   console.log(scrabbleTiles.Q); // Output: { count: 1, points: 10 }
@@ -44,13 +44,13 @@
     let turn; //1 for player 1, -1 for player 2
     let round; // number of turns taken by both players (for rendering first-round controls)
     let letterBag; //object that will keep track of which letters are still available in the bag
-    let playerOneLetters; //letters currently in Player 1's tray
-    let playerTwoLetters; //letters currently in Player 2's tray
-    let playerOneScore; //Player 1's current score
-    let playerTwoScore; //Player 2's current score
     let winner; // winner: null = no winner, 1/-1 = winner, 'T' = tie
 
-
+    const players = {
+        One: {turn: 1, score: 0, letters: []},
+        Two: {turn: -1, score: 0, letters: []}
+    }
+    
 /*----- cached elements  -----*/
     // const messageEl = document.querySelector('h2')
     // const playAgainBtn = document.querySelector('button')
@@ -86,6 +86,12 @@ function init () {
 	]
 
 	turn = 1
+    round = 1
+    letterBag = letters
+    playerOneLetters = []
+    playerTwoLetters = []
+    playerOneScore = 0
+    playerTwoScore = 0
 	winner = null
 	// render()
 }
@@ -94,23 +100,39 @@ function init () {
     
 
     function renderBoard(){
-        board.forEach(function(colArr, colIdx){
-            colArr.forEach(function(cellVal, rowIdx){
-                const cell = document.createElement('div')
-                cell.classList.add('board-cell')
-                cell.id = `cell-${colIdx}${rowIdx}`
-                
-                // if(cellVal === ''){
-                //     cell.style.backgroundColor = '#f0f0f0'
-                // }else{
-                //     cell.style.backgroundColor = '#353535'
-                // }
+        board.forEach(
+            function(colArr, colIdx){
+                colArr.forEach(
+                    function(cellVal, rowIdx){
+                        const cell = document.createElement('div')
+                        cell.classList.add('board-cell')
+                        cell.id = `cell-${colIdx}${rowIdx}`
+                        if(cell.id === 'cell-77'){cell.style.backgroundColor = '#dba4aa'}
+                        
+                        boardContainer.appendChild(cell)
+                    }
+                )	
+            }
+        )
+    }
 
-                if(cell.id === 'cell-77'){cell.style.backgroundColor = '#dba4aa'}
-                
-                boardContainer.appendChild(cell)
-            })	
-        })
+    function render(){
+        renderBoard()
+        renderScores()
+        // renderMessage()
+        // renderControls()
+    }
+
+    function renderScores(){
+        // document.querySelector('#player-scores > h3').innerText = players[1].score
+        const playerScores = document.querySelectorAll('#player-scores > h3')
+        playerScores[0].innerText = players.One.score
+        playerScores[1].innerText = players.Two.score
+        // playerScores.forEach(
+        //     function(playerScore, idx){
+        //         playerScore.innerText = players[idx].score
+        //     }
+        // )
     }
 
     // function renderControls(){
@@ -123,21 +145,15 @@ function init () {
     //     )
     // }
 
-    function render(){
-        renderBoard()
-        // renderMessage()
-        // renderControls()
-    }
-
     // function renderMessage(){
     //     if(winner === 'T'){
-    //         messageEl.innerText = "Tie Game!!!"
+    //         messageEl.innerText = 'Tie Game!!!'
     //     }else if(winner){
     //         messageEl.innerHTML = 
-    //         `<span style = "color: ${COLORS[winner]}">${COLORS[winner].toUpperCase()}</span> Wins!`
+    //         `<span style = 'color: ${COLORS[winner]}'>${COLORS[winner].toUpperCase()}</span> Wins!`
     //     }else{ //game still in play
     //         messageEl.innerHTML = 
-    //         `<span style = "color: ${COLORS[turn]}">${COLORS[turn].toUpperCase()}</span>'s Turn`
+    //         `<span style = 'color: ${COLORS[turn]}'>${COLORS[turn].toUpperCase()}</span>'s Turn`
     //         //messageEl.style.color = `${COLORS[winner]}`
     //     }
     // }
