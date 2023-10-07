@@ -31,7 +31,17 @@
     display: flex;
     flex-direction: row;
     justify-content: space-around;
+    font-size: 3vmin;
     /* margin-top: -3vmin; */
+  }
+
+  #turn-indicator {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    font-size: 3vmin;
+    margin-top: -3vmin;
+    margin-bottom: 4vmin;
   }
 
   #player-scores{
@@ -39,33 +49,8 @@
     flex-direction: row;
     justify-content: space-around;
     margin-top: -20px;
+    font-size: 4vmin;
   }
-
-  /* h2 {
-      color: darkgray;
-      height: 5vmin;
-  }
-  
-  #column-markers {
-      display: grid;
-      grid-template-columns: repeat(7, 10vmin);
-      gap: 0.5vmin;
-      margin-top: 1.5vmin;
-  }
-  
-  #column-markers > div {
-      height: 10vmin;
-      border-width: 5vmin;
-      border-style: solid;
-      border-color: lightgrey transparent transparent;
-      transform: scale(0.7)
-  }
-  
-  #column-markers > div:hover {
-      transform: scale(0.9);
-      transition: transform 150ms ease-in;
-      border-top-color: darkslategray;
-  } */
   
   #board-container {
     display: grid;
@@ -80,23 +65,25 @@
     border: 0.1vmin solid rgb(165, 165, 165);
   }
 
-  /* #cell-00{
-    background: black;
-  } */
-
   #board-container div:hover {
     background: rgb(255, 255, 255);
   }
 
+  #letter-tray {
+    background-color: #a3a3a3; 
+    width: 80vmin; 
+    height: 20vmin; 
+    margin: 3vmin 0vmin;
+  }
   
   
   button {
-      margin-top: 4vmin;
-      padding: 2vmin;
-      font-size: 2vmin;
-      border-radius: 4vmin;
-      border: 0.1vmin solid grey;
-      color: grey;
+    margin-top: 4vmin;
+    padding: 2vmin;
+    font-size: 2vmin;
+    border-radius: 4vmin;
+    border: 0.1vmin solid grey;
+    color: rgb(46, 46, 46);
   }
   
   button:hover {

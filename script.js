@@ -53,7 +53,9 @@
     
 /*----- cached elements  -----*/
     // const messageEl = document.querySelector('h2')
-    // const playAgainBtn = document.querySelector('button')
+    const selectLettersButton = document.getElementById('select-letters-button')
+    submitPlayButton = document.getElementById('submit-play-button')
+    const playAgainButton = document.getElementById('play-again-button')
     // const colMarkerEls = [...document.querySelectorAll('#column-markers > div')]
     const boardContainer = document.getElementById('board-container')
 
@@ -88,17 +90,12 @@ function init () {
 	turn = 1
     round = 1
     letterBag = letters
-    playerOneLetters = []
-    playerTwoLetters = []
-    playerOneScore = 0
-    playerTwoScore = 0
 	winner = null
 	// render()
 }
 
 //Visualize all state in the DOM
     
-
     function renderBoard(){
         board.forEach(
             function(colArr, colIdx){
@@ -120,7 +117,7 @@ function init () {
         renderBoard()
         renderScores()
         // renderMessage()
-        // renderControls()
+        renderControls()
     }
 
     function renderScores(){
@@ -135,15 +132,21 @@ function init () {
         // )
     }
 
-    // function renderControls(){
-    //     playAgainBtn.style.visibility = winner ? 'visible':'hidden'
-    //     colMarkerEls.forEach(
-    //         function(colMarkerEl, colIdx){
-    //             const hideMarker = !board[colIdx].includes(0) || winner
-    //             colMarkerEl.style.visibility = hideMarker ? 'hidden':'visible'
-    //         }
-    //     )
-    // }
+    function renderControls(){
+
+        // if(!winner && round > 1){submitPlayButton.style.visibility = 'visible'}
+            
+        submitPlayButton.style.visibility = !winner  && round > 1 ? 'visible':'hidden'
+        selectLettersButton.style.visibility = round === 1 ? 'visible':'hidden'
+        playAgainButton.style.visibility = winner ? 'visible':'hidden'
+
+        // colMarkerEls.forEach(
+        //     function(colMarkerEl, colIdx){
+        //         const hideMarker = !board[colIdx].includes(0) || winner
+        //         colMarkerEl.style.visibility = hideMarker ? 'hidden':'visible'
+        //     }
+        // )
+    }
 
     // function renderMessage(){
     //     if(winner === 'T'){
