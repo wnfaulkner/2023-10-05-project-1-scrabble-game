@@ -75,7 +75,13 @@
     // document.getElementById('column-markers').addEventListener('click', handleDrop)
     refillLettersButton.addEventListener('click', function(){refillLettersFromBag()})
     document.getElementById('letter-tray').addEventListener('click',selectLetter)
-    document.getElementById('board-container').addEventListener('click',placeLetter)
+    document.getElementById('board-container').addEventListener('click',function(){
+        if(selectedLetters.length !== 1){return}
+        placeLetter(event)
+        //renderBoard()
+        //selectedLetters = []
+    })
+    
     //playAgainBtn.addEventListener('click', init)
 
 
@@ -123,16 +129,18 @@
     }
     
     function renderBoard(){
+        boardContainer.innerHTML = ''
+
         board.forEach(
             function(colArr, colIdx){
                 colArr.forEach(
-                    function(cellVal, rowIdx){
+                    function(cellValue, rowIdx){
                         const cell = document.createElement('div')
                         cell.classList.add('board-cell')
-                        cell.id = `cell-${colIdx}${rowIdx}`
+                        cell.id = `${colIdx}_${rowIdx}`
                         if(cell.id === 'cell-77'){cell.style.backgroundColor = '#dba4aa'}
                         
-                        if(board[colIdx][rowIdx].length !== 0){//render a letter in the square when present in the board array
+                        if(board[colIdx][rowIdx] !== ''){//render a letter in the square when present in the board array
                             cell.innerText = board[colIdx][rowIdx]
                             cell.classList.add('board-cell-with-letter')
                         }
@@ -162,6 +170,7 @@
     }
 
     function renderLettersInTray(){
+        letterTray.innerHTML = ''
         if(turn === 1){player = players[0]}else{player = players[1]} 
         player.letters.forEach(
             function(letter){
@@ -217,24 +226,36 @@
 
     function placeLetter(event){
         if(selectedLetters.length !== 1){return} //guard: if have no selected letters
-        
-        const boardCellEl = document.querySelectorAll('#board-container > div')
-        //const boardCell = boardCellEl
-        console.log(boardCellEl)
+
+        const boardCellEl = event.target
+        if (!boardCellEl.classList.contains('board-cell')) {return} // guard: if the clicked element is not a valid board cell
+
+        const boardCellColIdx = parseInt(boardCellEl.id.split("_")[0])
+        const boardCellRowIdx = parseInt(boardCellEl.id.split("_")[1])
+
+        board[boardCellColIdx][boardCellRowIdx] = selectedLetters[0] //modify 'board' object in the background
+        renderBoard() //render updated board
+
+        if(turn === 1){player = players[0]}else{player = players[1]} 
+        player.letters = player.letters.filter((letter) => !selectedLetters.includes(letter))
+        renderLettersInTray()
 
 
     }
 
     function selectLetter(event){
+        if(turn === 1){player = players[0]}else{player = players[1]} 
         const currentLetterEls = document.getElementsByClassName('current-player-letter')
-        const currentLetterArray = [...currentLetterEls]
-        const letterIdx = currentLetterArray.indexOf(event.target)
+        
+        const currentLetterElsArray = [...currentLetterEls]
+        const letterIdx = currentLetterElsArray.indexOf(event.target)
         
         const selectedLetterEl = currentLetterEls[letterIdx] //update letter tray formatting to show that letter has been selected
         selectedLetterEl.style.backgroundColor = '#636363'
 
-        const selectedLetter = currentLetterArray[letterIdx] //return actual letter as js object
-        selectedLetters.push(selectLetter)
+        const selectedLetter = player.letters[letterIdx] //return actual letter as js object
+        selectedLetters.push(selectedLetter)
+        // console.log(letterIdx, player.letters, selectedLetter)
     }
 
     function submitPlay(){
