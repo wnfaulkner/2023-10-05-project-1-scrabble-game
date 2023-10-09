@@ -32,35 +32,38 @@
         //_: {count: 2, points: 0},
     };
 
-    // Expand letters object into an array containing the actual letter tiles
-    const letterArray = [];
-
-    for (const letter in letters) {
-        const letterData = letters[letter];
-        const { count } = letterData; // Extract the 'count' property
-        // Push the letter into the array 'count' number of times
-        for (let i = 0; i < count; i++) {
-            letterArray.push(letter);
-        }
-    }
-
-
+    
 /*----- state variables -----*/
 
     let board; //15x15 grid of divs with unique ids
     let turn; //1 for player 1, -1 for player 2
     let round; // number of turns taken by both players (for rendering first-round controls)
-    let letterBag; //object that will keep track of which letters are still available in the bag
     let winner; // winner: null = no winner, 1/-1 = winner, 'T' = tie
+    let selectedLetters; //letters that have been clicked and will either be going on the board or back into the letterbag
+    let exchangingLetters = false; //toggle variable that tells us whether the player is in the middle of a letter exchange, to help put guardrails on functions
 
-    const players = {
-        One: {turn: 1, score: 0, letters: []},
-        Two: {turn: -1, score: 0, letters: []}
+    const players = [
+        {name: 'One', turn: 0, score: 0, letters: []},
+        {name: 'Two', turn: 1, score: 0, letters: []}
+    ]
+
+    // Expand letters object into an array containing the actual letter tiles
+    let letterBag = [];
+
+    for (const letter in letters) {
+        const letterData = letters[letter];
+        const { count } = letterData; // Extract the 'count' property
+        
+        for (let i = 0; i < count; i++) { // Push the letter into the array 'count' number of times
+            letterBag.push(letter);
+        }
+        //console.log(letterBag)
     }
+    
     
 /*----- cached elements  -----*/
 
-    const selectLettersButton = document.getElementById('select-letters-button')
+    const refillLettersButton = document.getElementById('select-letters-button')
     const submitPlayButton = document.getElementById('submit-play-button')
     const playAgainButton = document.getElementById('play-again-button')
     
@@ -70,7 +73,9 @@
 
 /*----- event listeners -----*/
     // document.getElementById('column-markers').addEventListener('click', handleDrop)
-    selectLettersButton.addEventListener('click', function(){selectNewLetters()})
+    refillLettersButton.addEventListener('click', function(){refillLettersFromBag()})
+    document.getElementById('letter-tray').addEventListener('click',selectLetter)
+    document.getElementById('board-container').addEventListener('click',placeLetter)
     //playAgainBtn.addEventListener('click', init)
 
 
@@ -99,12 +104,23 @@
 
         turn = 1
         round = 1
-        letterBag = letters
         winner = null
-        // render()
+
+        players[0]['score'] = 0
+        players[1]['score'] = 0
+        players[0]['letters'] = []
+        players[1]['letters'] = []
+        selectedLetters = []
     }
 
 //Visualize all state in the DOM
+
+    function render(){
+        renderBoard()
+        renderScores()
+        // renderMessage()
+        renderControls()
+    }
     
     function renderBoard(){
         board.forEach(
@@ -116,6 +132,11 @@
                         cell.id = `cell-${colIdx}${rowIdx}`
                         if(cell.id === 'cell-77'){cell.style.backgroundColor = '#dba4aa'}
                         
+                        if(board[colIdx][rowIdx].length !== 0){//render a letter in the square when present in the board array
+                            cell.innerText = board[colIdx][rowIdx]
+                            cell.classList.add('board-cell-with-letter')
+                        }
+
                         boardContainer.appendChild(cell)
                     }
                 )	
@@ -123,36 +144,33 @@
         )
     }
 
-    function render(){
-        renderBoard()
-        renderScores()
-        // renderMessage()
-        renderControls()
-    }
 
-    function renderScores(){
-                
-        playerScores[0].innerText = players.One.score
-        playerScores[1].innerText = players.Two.score
+    function renderScores(){     
+        playerScores[0].innerText = players[0]['score']
+        playerScores[1].innerText = players[1]['score']
         // ! REFACTOR TO AN ARRAY ITERATOR, PROBABLY FOREACH?
     }
 
     function renderControls(){
             
-        submitPlayButton.style.visibility = !winner  && round > 1 ? 'visible':'hidden'
-        selectLettersButton.style.visibility = round === 1 ? 'visible':'hidden'
+        submitPlayButton.style.visibility = !winner ? 'visible':'hidden'
+        refillLettersButton.style.visibility = round === 1 ? 'visible':'hidden'
         playAgainButton.style.visibility = winner ? 'visible':'hidden'
-
-        renderLetterTray()
+        
+        // renderLettersInTray()
 
     }
 
-    function renderLetterTray(){
-        letterTray.innerText = players.One.letters
-    }
-
-    function renderLetterTile(){
-
+    function renderLettersInTray(){
+        if(turn === 1){player = players[0]}else{player = players[1]} 
+        player.letters.forEach(
+            function(letter){
+                const letterTile = document.createElement('div')
+                letterTile.innerText = letter
+                letterTile.classList.add('current-player-letter')
+                letterTray.appendChild(letterTile)
+            }    
+        )
     }
 
     // function renderMessage(){
@@ -172,36 +190,62 @@
 
 //Update board in response to user action
     
-    function selectNewLetters(){
-        if(turn === 1){player = players.One}else{player = players.Two} 
-        //Solution suggested by chatgpt for finding index of player whose turn === 1 - not using becuase does not seem that much more elegant for now
-        // const playerWithTurnOne = Object.keys(players).find(playerName => players[playerName].turn === 1);
-        // const indexOfPlayerWithTurnOne = Object.keys(players).indexOf(playerWithTurnOne);
-        // console.log(indexOfPlayerWithTurnOne);
-
-        const numLettersToRefill = 7 - player.letters.length
-        const refillLetters = []
-    
-        for(let i = 0; i < numLettersToRefill; i++){
-            refillLetters[i] = selectRandomLetterFromLetterBag()
-        }
-        console.log(refillLetters)
-
-        player.letters = [...player.letters, ...refillLetters]
-        console.log(players)
-    }
-    
-    function selectRandomLetterFromLetterBag(){
-        const totalCount = Object.values(letters).reduce((total, letter) => total + letter.count, 0)
-
-        const randomIndex = Math.floor(Math.random() * totalCount) + 1;
-        randomLetter = letterArray[randomIndex]
-
-        return(randomLetter)
+    function refillLettersFromBag(){
+        if(turn === 1){player = players[0]}else{player = players[1]} 
+       
+        const numLettersToRefill = 7 - player.letters.length //number of letters to be added to the player's tray
         
+        if(numLettersToRefill === 0){return} //guard: in case refillLettersButton gets clicked more than once
+        if(numLettersToRefill > letterBag.length){numLettersToRefill = letterBag.length} //guard: for when players get down to only having less than seven letters left in the bag
+        
+        const refillLetters = []
+        for(let i = 0; i < numLettersToRefill; i++){
+            refillLetters[i] = refillLetterFromBag()
+        }
+
+        player.letters = [...player.letters, ...refillLetters] //refill the player's letter tray
+        renderLettersInTray()
+    }
+    
+    function refillLetterFromBag(){
+        const numLettersInLetterBag = letterBag.length
+        const randomIndex = Math.floor(Math.random() * numLettersInLetterBag) + 1;
+        randomLetter = letterBag[randomIndex]
+        letterBag.splice(randomIndex,1) //Take letter OUT of letterBag so it cannot be selected anymore and doesn't count towards numLettersInLetterBag
+        return(randomLetter)
     }
 
+    function placeLetter(event){
+        if(selectedLetters.length !== 1){return} //guard: if have no selected letters
+        
+        const boardCellEl = document.querySelectorAll('#board-container > div')
+        //const boardCell = boardCellEl
+        console.log(boardCellEl)
 
+
+    }
+
+    function selectLetter(event){
+        const currentLetterEls = document.getElementsByClassName('current-player-letter')
+        const currentLetterArray = [...currentLetterEls]
+        const letterIdx = currentLetterArray.indexOf(event.target)
+        
+        const selectedLetterEl = currentLetterEls[letterIdx] //update letter tray formatting to show that letter has been selected
+        selectedLetterEl.style.backgroundColor = '#636363'
+
+        const selectedLetter = currentLetterArray[letterIdx] //return actual letter as js object
+        selectedLetters.push(selectLetter)
+    }
+
+    function submitPlay(){
+
+        selectedLetters = []
+    }
+    
+    function endTurn(){
+
+        selectedLetters = []
+    }
 
     // function handleDrop(event){
     //     const colIdx = colMarkerEls.indexOf(event.target)

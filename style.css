@@ -1,7 +1,7 @@
 * {
     /* background-color: rgb(255, 253, 253); */
     /* box-sizing: border-box; */
-    /* border: 0.1vmin dashed grey; */
+    border: 0.1vmin dashed grey;
   }
   
   body {
@@ -65,18 +65,38 @@
     border: 0.1vmin solid rgb(165, 165, 165);
   }
 
+  .board-cell-with-letter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background:rgb(46, 46, 46) !important;
+    color:#f7f7f7;
+  }
+
   #board-container div:hover {
     background: rgb(255, 255, 255);
   }
 
   #letter-tray {
-    background-color: #a3a3a3; 
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #a3a3a3;
     width: 80vmin; 
-    height: 20vmin; 
+    height: 10vmin; 
     margin: 3vmin 0vmin;
   }
   
-  
+  #letter-tray > div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background:rgb(46, 46, 46);
+    color:#f7f7f7;
+    width: 6vmin;
+    height: 6vmin;
+  }
+
   
   button {
     margin-top: 4vmin;
