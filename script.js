@@ -32,11 +32,18 @@
         //_: {count: 2, points: 0},
     };
 
-    // Example usage:
-        //   console.log(scrabbleTiles.E); // Output: { count: 12, points: 1 }
-        //   console.log(scrabbleTiles.Q); // Output: { count: 1, points: 10 }
-        //   console.log(scrabbleTiles._); // Output: { count: 2, points: 0 }
-    
+    // Expand letters object into an array containing the actual letter tiles
+    const letterArray = [];
+
+    for (const letter in letters) {
+        const letterData = letters[letter];
+        const { count } = letterData; // Extract the 'count' property
+        // Push the letter into the array 'count' number of times
+        for (let i = 0; i < count; i++) {
+            letterArray.push(letter);
+        }
+    }
+
 
 /*----- state variables -----*/
 
@@ -52,47 +59,50 @@
     }
     
 /*----- cached elements  -----*/
-    // const messageEl = document.querySelector('h2')
+
     const selectLettersButton = document.getElementById('select-letters-button')
-    submitPlayButton = document.getElementById('submit-play-button')
+    const submitPlayButton = document.getElementById('submit-play-button')
     const playAgainButton = document.getElementById('play-again-button')
-    // const colMarkerEls = [...document.querySelectorAll('#column-markers > div')]
+    
     const boardContainer = document.getElementById('board-container')
+    const playerScores = document.querySelectorAll('#player-scores > h3')
+    const letterTray = document.getElementById('letter-tray')
 
 /*----- event listeners -----*/
     // document.getElementById('column-markers').addEventListener('click', handleDrop)
-    // playAgainBtn.addEventListener('click', init)
+    selectLettersButton.addEventListener('click', function(){selectNewLetters()})
+    //playAgainBtn.addEventListener('click', init)
 
 
 /*----- functions -----*/
 
 //Initialize all state, then call render()
-function init () {
-	//Rotate 90 degrees counter-clockwise and array is visualization of the board
-	board = [
-        ['','','','','','','','','','','','','','',''],
-        ['','','','','','','','','','','','','','',''],
-        ['','','','','','','','','','','','','','',''],
-        ['','','','','','','','','','','','','','',''],
-        ['','','','','','','','','','','','','','',''],
-        ['','','','','','','','','','','','','','',''],
-        ['','','','','','','','','','','','','','',''],
-        ['','','','','','','','','','','','','','',''],
-        ['','','','','','','','','','','','','','',''],
-        ['','','','','','','','','','','','','','',''],
-        ['','','','','','','','','','','','','','',''],
-        ['','','','','','','','','','','','','','',''],
-        ['','','','','','','','','','','','','','',''],
-        ['','','','','','','','','','','','','','',''],
-        ['','','','','','','','','','','','','','','']		
-	]
+    function init () {
+        //Rotate 90 degrees counter-clockwise and array is visualization of the board
+        board = [
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','','']		
+        ]
 
-	turn = 1
-    round = 1
-    letterBag = letters
-	winner = null
-	// render()
-}
+        turn = 1
+        round = 1
+        letterBag = letters
+        winner = null
+        // render()
+    }
 
 //Visualize all state in the DOM
     
@@ -121,31 +131,28 @@ function init () {
     }
 
     function renderScores(){
-        // document.querySelector('#player-scores > h3').innerText = players[1].score
-        const playerScores = document.querySelectorAll('#player-scores > h3')
+                
         playerScores[0].innerText = players.One.score
         playerScores[1].innerText = players.Two.score
-        // playerScores.forEach(
-        //     function(playerScore, idx){
-        //         playerScore.innerText = players[idx].score
-        //     }
-        // )
+        // ! REFACTOR TO AN ARRAY ITERATOR, PROBABLY FOREACH?
     }
 
     function renderControls(){
-
-        // if(!winner && round > 1){submitPlayButton.style.visibility = 'visible'}
             
         submitPlayButton.style.visibility = !winner  && round > 1 ? 'visible':'hidden'
         selectLettersButton.style.visibility = round === 1 ? 'visible':'hidden'
         playAgainButton.style.visibility = winner ? 'visible':'hidden'
 
-        // colMarkerEls.forEach(
-        //     function(colMarkerEl, colIdx){
-        //         const hideMarker = !board[colIdx].includes(0) || winner
-        //         colMarkerEl.style.visibility = hideMarker ? 'hidden':'visible'
-        //     }
-        // )
+        renderLetterTray()
+
+    }
+
+    function renderLetterTray(){
+        letterTray.innerText = players.One.letters
+    }
+
+    function renderLetterTile(){
+
     }
 
     // function renderMessage(){
@@ -163,7 +170,39 @@ function init () {
 
     
 
-    // //Update board in response to user action
+//Update board in response to user action
+    
+    function selectNewLetters(){
+        if(turn === 1){player = players.One}else{player = players.Two} 
+        //Solution suggested by chatgpt for finding index of player whose turn === 1 - not using becuase does not seem that much more elegant for now
+        // const playerWithTurnOne = Object.keys(players).find(playerName => players[playerName].turn === 1);
+        // const indexOfPlayerWithTurnOne = Object.keys(players).indexOf(playerWithTurnOne);
+        // console.log(indexOfPlayerWithTurnOne);
+
+        const numLettersToRefill = 7 - player.letters.length
+        const refillLetters = []
+    
+        for(let i = 0; i < numLettersToRefill; i++){
+            refillLetters[i] = selectRandomLetterFromLetterBag()
+        }
+        console.log(refillLetters)
+
+        player.letters = [...player.letters, ...refillLetters]
+        console.log(players)
+    }
+    
+    function selectRandomLetterFromLetterBag(){
+        const totalCount = Object.values(letters).reduce((total, letter) => total + letter.count, 0)
+
+        const randomIndex = Math.floor(Math.random() * totalCount) + 1;
+        randomLetter = letterArray[randomIndex]
+
+        return(randomLetter)
+        
+    }
+
+
+
     // function handleDrop(event){
     //     const colIdx = colMarkerEls.indexOf(event.target)
     //     // console.log(colIdx)
