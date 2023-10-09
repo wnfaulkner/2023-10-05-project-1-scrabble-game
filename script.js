@@ -39,7 +39,9 @@
     let turn; //1 for player 1, -1 for player 2
     let round; // number of turns taken by both players (for rendering first-round controls)
     let winner; // winner: null = no winner, 1/-1 = winner, 'T' = tie
-    let selectedLetters; //letters that have been clicked and will either be going on the board or back into the letterbag
+    let refillLettersButtonClicked = false //turns true once button is clicked so it can be hidden
+    let selectedLetters = []; //letters that have been clicked and will either be going on the board or back into the letterbag
+    let placedLetters = []; //letters that were placed during the current turn
     let exchangingLetters = false; //toggle variable that tells us whether the player is in the middle of a letter exchange, to help put guardrails on functions
 
     const players = [
@@ -72,15 +74,23 @@
     const letterTray = document.getElementById('letter-tray')
 
 /*----- event listeners -----*/
-    // document.getElementById('column-markers').addEventListener('click', handleDrop)
-    refillLettersButton.addEventListener('click', function(){refillLettersFromBag()})
+
+    refillLettersButton.addEventListener('click', 
+        function(){
+            refillLettersFromBag()
+            refillLettersButtonClicked = true
+            renderControls()
+        }
+    )
     document.getElementById('letter-tray').addEventListener('click',selectLetter)
-    document.getElementById('board-container').addEventListener('click',function(){
-        if(selectedLetters.length !== 1){return}
-        placeLetter(event)
-        //renderBoard()
-        //selectedLetters = []
-    })
+    document.getElementById('board-container').addEventListener('click',
+        function(){
+            if(selectedLetters.length !== 1){return}
+            placeLetter(event)
+            //renderBoard()
+            //selectedLetters = []
+        }
+    )
     
     //playAgainBtn.addEventListener('click', init)
 
@@ -162,10 +172,8 @@
     function renderControls(){
             
         submitPlayButton.style.visibility = !winner ? 'visible':'hidden'
-        refillLettersButton.style.visibility = round === 1 ? 'visible':'hidden'
+        refillLettersButton.style.visibility = refillLettersButtonClicked ? 'hidden':'visible'
         playAgainButton.style.visibility = winner ? 'visible':'hidden'
-        
-        // renderLettersInTray()
 
     }
 
@@ -237,9 +245,14 @@
         renderBoard() //render updated board
 
         if(turn === 1){player = players[0]}else{player = players[1]} 
-        player.letters = player.letters.filter((letter) => !selectedLetters.includes(letter))
-        renderLettersInTray()
 
+        const indexToRemove = player.letters.indexOf(selectedLetters[0])
+        player.letters.splice(indexToRemove, 1) //remove the letter from the player's current letters
+        renderLettersInTray() //re-render the tray with the letter that was placed now gone
+        placedLetters.push(selectedLetters[0])
+        selectedLetters = [] //reset selectedLetters so placeLetter can be called again
+
+        console.log(indexToRemove, player.letters)
 
     }
 
