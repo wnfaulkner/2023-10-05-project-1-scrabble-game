@@ -53,7 +53,8 @@
 /*----- state variables -----*/
 
     let board; //15x15 grid of divs with unique ids
-    let turn; //1 for player 1, -1 for player 2
+    let turn; //1 for player 1, 2 for player 2
+    let player; //will be used for more easily modifying the 'players' object
     let round; // number of turns taken by both players (for rendering first-round controls)
     let winner; // winner: null = no winner, 1/-1 = winner, 'T' = tie
     let refillLettersButtonClicked = false //turns true once button is clicked so it can be hidden
@@ -189,12 +190,9 @@
 
     function renderLettersInTray(){
         letterTray.innerHTML = ''
-        let player
-        if(turn === 1){player = players[0]}else{player = players[1]} 
-        // Debugging
-        // console.log(player); // Check the content of the player object
-        // console.log(Array.isArray(player.letters)); // Check if player.letters is an array
 
+        if(turn === 1){player = players[0]}else{player = players[1]} 
+    
         player.letters.forEach(
             function(letter){
                 const letterTile = document.createElement('div')
@@ -294,20 +292,15 @@
 
         if(!checkPlay()){
             
-            //Remove placed letters from board
-            // if(turn === 1 && round === 1){boardAsOfEndOfLastTurn = blankBoard}
-            board = boardAsOfEndOfLastTurn
+            
+            board = boardAsOfEndOfLastTurn //Remove placed letters from board
 
-            let player
             if(turn === 1){player = players[0]}else{player = players[1]}
             player.letters = [...player.letters, ...placedLetters.map((element) => element.letter)] //return placed letter to player's tray
-            
-            console.log(player); // Check the content of the player object
-            console.log(player.letters); // Check if player.letters is an array
 
             endTurnUpdates()
             render()
-            return    
+            return  
         }
         // scorePlay()
         
@@ -320,22 +313,19 @@
 //Checking the Validity of the Play
     
     function checkPlay(){
-        
-        let checkFirstPlayResult // check whether play is horizontal and covers first square
-        if(turn === 1 && round === 1){
-            checkFirstPlayResult = checkFirstPlay()
-        }else{
-            checkFirstPlayResult = true
-        } 
-
+        const checkFirstPlayResult = checkFirstPlay() 
         const checkStraightPlayResult = checkStraightPlay()
-        const result = checkFirstPlayResult && checkStraightPlayResult
-        // console.log(checkFirstPlayResult, checkStraightPlayResult, result)
+        const checkPlayConnectedResult = checkPlayConnected()
+
+        const result = checkFirstPlayResult && checkStraightPlayResult && checkPlayConnectedResult
+        console.log(boardAsOfEndOfLastTurn, checkPlayConnectedResult, result)
         return(result)
 
     }
 
+    //! NEED TO ACCOUNT FOR STATE: FIRST PLAYER SUBMITS INVALID PLAY SO SECOND PLAYER'S TURN NEEDS TO GET CHECKED WITH CHECKFIRSTPLAY
     function checkFirstPlay(){
+        if(turn !== 1 || round !== 1){return(true)} //guard: if this is not the first play, return 'true' (these checks no longer applicable)
         const xCoords = placedLetters.map((item) => item.xCoord)
         const yCoords = placedLetters.map((item) => item.yCoord)
 
@@ -349,7 +339,6 @@
         if(uniqueXCoords.includes(7) && uniqueYCoords.includes(7)){coversCentralSquare = true}
 
         const result = isHorizontalPlay && coversCentralSquare
-
 
         return(result)
     }
@@ -365,12 +354,17 @@
         return(result)
     }
 
-    function checkWordConnected(){
-        selectedLetters.forEach(checkLetterConnected())
+    function checkPlayConnected(){
+        if(turn === 1 && round === 1){return(true)} //guard: if this is the first play, return 'true' (can't be connected on the first play)
+        result = placedLetters.map((item) => checkLetterConnected(item)).some((element) => element === true)
+        return(result)
     }
 
-    function checkLetterConnected(){
-
+    function checkLetterConnected(placedLetter){
+        const adjacentCells = getAdjacentCells(boardAsOfEndOfLastTurn, placedLetter.xCoord, placedLetter.yCoord)
+        result = adjacentCells.map((item) => item.contents !== '').some((element) => element === true)
+        console.log(result)
+        return(result)
     }
 
     function getAdjacentCells(grid, col, row) {
