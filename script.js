@@ -316,13 +316,17 @@
         const checkFirstPlayResult = checkFirstPlay() 
         const checkStraightPlayResult = checkStraightPlay()
         const checkPlayConnectedResult = checkPlayConnected()
+        // const checkValidWordsResult = checkValidWords()
+        console.log(checkValidWords())
 
         const result = checkFirstPlayResult && checkStraightPlayResult && checkPlayConnectedResult
-        console.log(boardAsOfEndOfLastTurn, checkPlayConnectedResult, result)
+        // console.log(boardAsOfEndOfLastTurn, checkPlayConnectedResult, result)
         return(result)
 
     }
 
+
+    //Checking Validity of Placement
     //! NEED TO ACCOUNT FOR STATE: FIRST PLAYER SUBMITS INVALID PLAY SO SECOND PLAYER'S TURN NEEDS TO GET CHECKED WITH CHECKFIRSTPLAY
     function checkFirstPlay(){
         if(turn !== 1 || round !== 1){return(true)} //guard: if this is not the first play, return 'true' (these checks no longer applicable)
@@ -363,36 +367,25 @@
     function checkLetterConnected(placedLetter){
         const adjacentCells = getAdjacentCells(boardAsOfEndOfLastTurn, placedLetter.xCoord, placedLetter.yCoord)
         result = adjacentCells.map((item) => item.contents !== '').some((element) => element === true)
-        console.log(result)
+        // console.log(result)
         return(result)
     }
 
-    function getAdjacentCells(grid, col, row) {
-        if(col > 14 || row > 14){return}
-    
-        const adjacentCells = [];
-    
-        const offsets = [ // Define offsets for adjacent cells (up, down, left, right)
-            { row: -1, col: 0 }, // Up
-            { row: 1, col: 0 },  // Down
-            { row: 0, col: -1 }, // Left
-            { row: 0, col: 1 }   // Right
-        ];
-    
-        for (const offset of offsets) {
-            const newRow = row + offset.row
-            const newCol = col + offset.col
-            
-            //guard: check if the new coordinates on the
-            if (newRow >= 0 && newRow <= 14 && newCol >= 0 && newCol <= 14) {
-                const adjacentCellContents = grid[newCol][newRow]
-                adjacentCells.push({contents: adjacentCellContents, col: newCol, row: newRow});
-            }
-            
-        }
-        
+    //Checking Validity of New Words Created by the Play
 
-        return adjacentCells;
+    function checkValidWords(){
+        return(getNewWordsCreatedByPlay())
+    }
+
+    function getNewWordsCreatedByPlay(){
+        newWords = [...placedLetters.map((placedLetter) => getHorizontalWordForLetter(placedLetter))]
+        return(newWords)
+    }
+
+    function getHorizontalWordForLetter(placedLetter){
+        
+        
+        return(placedLetter.letter)
     }
 
 //Scoring the Play
@@ -414,9 +407,96 @@
         
     }
 
-//Ending the Turn
+//Other Functions (often useful in more than one of the above)
+
+    function getAdjacentCells(grid, col, row, direction) {
+        if(col > 14 || row > 14){return}
+        
+        // if (direction !== 'all' && direction !== 'horizontal' && direction !== 'vertical') { // Check if the direction is valid
+        //     throw new Error('Invalid direction. Accepted values are "all", "horizontal", or "vertical".');
+        // }
+
+        //Create correct offsets to provide only results for the selected direction
+        let offsets 
+        switch(direction){
+            
+            case 'all':
+            offsets = [ // Define offsets for adjacent cells (up, down, left, right)
+                { row: -1, col: 0 }, // Up
+                { row: 1, col: 0 },  // Down
+                { row: 0, col: -1 }, // Left
+                { row: 0, col: 1 }   // Right
+            ]; break;
+            
+            case 'horizontal':
+            offsets = [ // Define offsets for adjacent cells (left, right)
+                { row: 0, col: -1 }, // Left
+                { row: 0, col: 1 }   // Right
+            ]; break;
+         
+            case 'vertical':
+            offsets = [ // Define offsets for adjacent cells (up, down)
+                { row: -1, col: 0 }, // Up
+                { row: 1, col: 0 },  // Down
+            ]; break;
+
+            default:
+            offsets = [ // Define offsets for adjacent cells (up, down, left, right)
+                { row: -1, col: 0 }, // Up
+                { row: 1, col: 0 },  // Down
+                { row: 0, col: -1 }, // Left
+                { row: 0, col: 1 }   // Right
+            ];
+        
+        }
+
+        const adjacentCells = [] //empty object for storing results of loop
+        for (const offset of offsets) {
+            const newRow = row + offset.row
+            const newCol = col + offset.col
+            
+            //guard: check if the new coordinates on the
+            if (newRow >= 0 && newRow <= 14 && newCol >= 0 && newCol <= 14) {
+                const adjacentCellContents = grid[newCol][newRow]
+                adjacentCells.push({contents: adjacentCellContents, col: newCol, row: newRow});
+            }
+            
+        }
+        
+
+        return adjacentCells;
+    }
+
+    function getAdjacentCellsHorizontal(grid, col, row) {
+        if(col > 14 || row > 14){return}
+
+        const adjacentCells = [];
+
+        const offsets = [ // Define offsets for adjacent cells (up, down, left, right)
+            { row: -1, col: 0 }, // Up
+            { row: 1, col: 0 },  // Down
+            { row: 0, col: -1 }, // Left
+            { row: 0, col: 1 }   // Right
+        ];
+
+        for (const offset of offsets) {
+            const newRow = row + offset.row
+            const newCol = col + offset.col
+            
+            //guard: check if the new coordinates on the
+            if (newRow >= 0 && newRow <= 14 && newCol >= 0 && newCol <= 14) {
+                const adjacentCellContents = grid[newCol][newRow]
+                adjacentCells.push({contents: adjacentCellContents, col: newCol, row: newRow});
+            }
+            
+        }
+        
+
+        return adjacentCells;
+    }
+
     function endTurnUpdates(){
-        // boardAsOfEndOfLastTurn = board
+       
         refillLettersButtonClicked = false //reset refillLettersButoonClicked
         selectedLetters = [] // reset selectedLetters
         placedLetters = [] // reset placedLetters
