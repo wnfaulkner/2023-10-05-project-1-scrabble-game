@@ -4,110 +4,143 @@
     border: 0.1vmin dashed grey;
   }
   
-  body {
-      /* viewport units: vh (viewport height), vw, vmin (smallest between vh & vw)*/
-      height: 100vh;
-      margin: 0;
-      font-family: 'Montserrat', sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-  }
-  
-  h1 {
-      font-size: 6vmin;
-      font-weight: bolder;
-      color: rgb(139, 22, 22);
-  }
-  
-  #scoreboard {
-    /* background-color: aqua; */
-    width: 90%;
-  }
-
-  #scoreboard-headers {
+body {
+    /* viewport units: vh (viewport height), vw, vmin (smallest between vh & vw)*/
+    height: 100vh;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    font-size: 3vmin;
-    /* margin-top: -3vmin; */
-  }
-
-  #turn-indicator {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    font-size: 3vmin;
-    margin-top: -3vmin;
-    margin-bottom: 4vmin;
-  }
-
-  #player-scores{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    margin-top: -20px;
-    font-size: 4vmin;
-  }
-  
-  #board-container {
-    display: grid;
-    grid-template-columns: repeat(15, 6vmin);
-    grid-template-rows: repeat(15, 6vmin);
-    /* gap: 1vmin; */
-    margin-top: -0.5vmin;
-  }
-   
-  #board-container > div {
-    background: rgb(248, 235, 218);
-    border: 0.1vmin solid rgb(165, 165, 165);
-  }
-
-  .board-cell-with-letter {
-    display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    background:rgb(46, 46, 46) !important;
-    color:#f7f7f7;
-  }
+    text-align: center;
+}
 
-  #board-container div:hover {
-    background: rgb(255, 255, 255);
-  }
+.hidden{
+  visibility: hidden;
+}
 
-  #letter-tray {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    background-color: #a3a3a3;
-    width: 80vmin; 
-    height: 10vmin; 
-    margin: 3vmin 0vmin;
-  }
-  
-  #letter-tray > div {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background:rgb(46, 46, 46);
-    color:#f7f7f7;
-    width: 6vmin;
-    height: 6vmin;
-  }
+h1 {
+    font-size: 6vmin;
+    font-weight: bolder;
+    color: rgb(139, 22, 22);
+}
 
+#scoreboard {
+  /* background-color: aqua; */
+  width: 90%;
+}
+
+#scoreboard-headers {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  font-size: 3vmin;
+  /* margin-top: -3vmin; */
+}
+
+#turn-indicator {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  justify-items: center;
+  font-size: 3vmin;
+  /* margin-top: -3vmin; */
+  margin-bottom: 4vmin;
+}
+
+.turn-indicator  {
+  /* display: flex; */
+  /* justify-content: flex-end; */
+  width: 0;
+  height: 0;
+  border-left: 3vmin solid transparent;
+  border-right: 3vmin solid transparent;
+  border-bottom: 3vmin solid transparent;
+  /* border-width: 5px; */
+}
+
+.active-turn-indicator {
+  border-bottom: 3vmin solid rgb(139, 22, 22);
+}
+
+#player-scores{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin-top: -20px;
+  font-size: 4vmin;
+}
+
+#board-container {
+  display: grid;
+  grid-template-columns: repeat(15, 6vmin);
+  grid-template-rows: repeat(15, 6vmin);
+  /* gap: 1vmin; */
+  margin-top: -0.5vmin;
+}
   
-  button {
-    margin-top: 4vmin;
-    padding: 2vmin;
-    font-size: 2vmin;
-    border-radius: 4vmin;
-    border: 0.1vmin solid grey;
-    color: rgb(46, 46, 46);
-  }
-  
-  button:hover {
-      color: rgb(228, 228, 228);
-      background-color: darkslategray;
-  }
+#board-container > div {
+  background: rgb(248, 235, 218);
+  border: 0.1vmin solid rgb(165, 165, 165);
+}
+
+.board-cell-with-letter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background:rgb(46, 46, 46) !important;
+  color:#f7f7f7;
+}
+
+#board-container div:hover {
+  background: rgb(255, 255, 255);
+}
+
+#letter-tray {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background-color: #a3a3a3;
+  width: 80vmin; 
+  height: 10vmin; 
+  margin: 3vmin 0vmin;
+}
+
+#letter-tray > div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background:rgb(46, 46, 46);
+  color:#f7f7f7;
+  width: 6vmin;
+  height: 6vmin;
+}
+
+#buttons-container {
+  width: 90%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+button {
+  margin-top: 4vmin;
+  padding: 2vmin;
+  font-size: 2vmin;
+  border-radius: 4vmin;
+  border: 0.1vmin solid grey;
+  color: rgb(46, 46, 46);
+}
+
+button:hover {
+    color: rgb(228, 228, 228);
+    background-color: darkslategray;
+}
+
+#letters-left-indicator {
+  width: 80%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+
+}

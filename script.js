@@ -83,21 +83,16 @@
         }
     )
     document.getElementById('letter-tray').addEventListener('click',selectLetter)
-    document.getElementById('board-container').addEventListener('click',
-        function(){
-            if(selectedLetters.length !== 1){return}
-            placeLetter(event)
-            //renderBoard()
-            //selectedLetters = []
-        }
-    )
-    
+    document.getElementById('board-container').addEventListener('click',placeLetter)
+    submitPlayButton.addEventListener('click', submitPlay)
+        
     //playAgainBtn.addEventListener('click', init)
 
 
 /*----- functions -----*/
 
 //Initialize all state, then call render()
+
     function init () {
         //Rotate 90 degrees counter-clockwise and array is visualization of the board
         board = [
@@ -127,15 +122,18 @@
         players[0]['letters'] = []
         players[1]['letters'] = []
         selectedLetters = []
+        placedLetters = []
     }
 
 //Visualize all state in the DOM
 
     function render(){
-        renderBoard()
         renderScores()
-        // renderMessage()
+        renderTurnIndicator()
+        renderBoard()
+        renderLettersInTray()
         renderControls()
+        renderNumberOfLettersLeftInBag()
     }
     
     function renderBoard(){
@@ -177,6 +175,17 @@
 
     }
 
+    function renderTurnIndicator(){
+        let turnIndicatorEl;
+        if(turn === 1){
+            document.querySelector('#player-1-turn-indicator').classList.add('active-turn-indicator')
+            document.querySelector('#player-2-turn-indicator').classList.remove('active-turn-indicator')
+        }else{
+            document.querySelector('#player-2-turn-indicator').classList.add('active-turn-indicator')
+            document.querySelector('#player-1-turn-indicator').classList.remove('active-turn-indicator')
+        }
+    }
+
     function renderLettersInTray(){
         letterTray.innerHTML = ''
         if(turn === 1){player = players[0]}else{player = players[1]} 
@@ -190,23 +199,13 @@
         )
     }
 
-    // function renderMessage(){
-    //     if(winner === 'T'){
-    //         messageEl.innerText = 'Tie Game!!!'
-    //     }else if(winner){
-    //         messageEl.innerHTML = 
-    //         `<span style = 'color: ${COLORS[winner]}'>${COLORS[winner].toUpperCase()}</span> Wins!`
-    //     }else{ //game still in play
-    //         messageEl.innerHTML = 
-    //         `<span style = 'color: ${COLORS[turn]}'>${COLORS[turn].toUpperCase()}</span>'s Turn`
-    //         //messageEl.style.color = `${COLORS[winner]}`
-    //     }
-    // }
+    function renderNumberOfLettersLeftInBag(){
+        const numberofLettersLeftInBag = letterBag.length
+        document.getElementById('number-of-letters-left-in-bag').innerText = numberofLettersLeftInBag
+    }
 
-    
+//User Interactions
 
-//Update board in response to user action
-    
     function refillLettersFromBag(){
         if(turn === 1){player = players[0]}else{player = players[1]} 
        
@@ -221,7 +220,7 @@
         }
 
         player.letters = [...player.letters, ...refillLetters] //refill the player's letter tray
-        renderLettersInTray()
+        render()
     }
     
     function refillLetterFromBag(){
@@ -229,6 +228,7 @@
         const randomIndex = Math.floor(Math.random() * numLettersInLetterBag) + 1;
         randomLetter = letterBag[randomIndex]
         letterBag.splice(randomIndex,1) //Take letter OUT of letterBag so it cannot be selected anymore and doesn't count towards numLettersInLetterBag
+        renderNumberOfLettersLeftInBag()
         return(randomLetter)
     }
 
@@ -236,8 +236,9 @@
         if(selectedLetters.length !== 1){return} //guard: if have no selected letters
 
         const boardCellEl = event.target
-        if (!boardCellEl.classList.contains('board-cell')) {return} // guard: if the clicked element is not a valid board cell
-
+        if(!boardCellEl.classList.contains('board-cell')) {return} // guard: if the clicked element is not a valid board cell
+        if(boardCellEl.classList.contains('board-cell-with-letter')){return} //guard: can't place a letter on top of a letter
+        
         const boardCellColIdx = parseInt(boardCellEl.id.split("_")[0])
         const boardCellRowIdx = parseInt(boardCellEl.id.split("_")[1])
 
@@ -246,13 +247,16 @@
 
         if(turn === 1){player = players[0]}else{player = players[1]} 
 
+        //cleanup
         const indexToRemove = player.letters.indexOf(selectedLetters[0])
         player.letters.splice(indexToRemove, 1) //remove the letter from the player's current letters
         renderLettersInTray() //re-render the tray with the letter that was placed now gone
-        placedLetters.push(selectedLetters[0])
+        
+        const placedLetter = {letter: selectedLetters[0], xCoord: boardCellColIdx, yCoord: boardCellRowIdx}
+        placedLetters.push(placedLetter) //add placed letter to placedLetters
         selectedLetters = [] //reset selectedLetters so placeLetter can be called again
 
-        console.log(indexToRemove, player.letters)
+        // console.log(indexToRemove, player.letters)
 
     }
 
@@ -272,79 +276,64 @@
     }
 
     function submitPlay(){
+        if(placedLetters === [] && !exchangingLetters){return}
 
-        selectedLetters = []
-    }
-    
-    function endTurn(){
+        checkPlay()
+        scorePlay()
 
-        selectedLetters = []
-    }
 
-    // function handleDrop(event){
-    //     const colIdx = colMarkerEls.indexOf(event.target)
-    //     // console.log(colIdx)
-
-    //     if(colIdx === -1){return} //Guards
-    //     const colArr = board[colIdx] //shortcut to the column
-    //     const rowIdx = colArr.indexOf(0)
-    //     // console.log(rowIdx)
+        //cleanup
+        selectedLetters = [] // reset selectedLetters
+        if(turn === 1){ // update turn and round
+            turn = 2
+        }else{
+            turn = 1
+            round += 1
+        }
         
-    //     colArr[rowIdx] = turn
+        // placedLetters = []
+        exchangingLetters = false
+        refillLettersButtonClicked = false
 
-    //     turn *= -1 
-    //     winner = getWinner(colIdx, rowIdx)
-    //     render()
-    // }
+        // console.log(turn, round, exchangingLetters, selectedLetters, players)
 
-    // function getWinner(colIdx, rowIdx){
-    //     return checkVerticalWin(colIdx, rowIdx) ||
-    //     checkHorizontalWin(colIdx, rowIdx) ||
-    //     checkDiagonalNWSEWin(colIdx, rowIdx) ||
-    //     checkDiagonalNESWWin(colIdx, rowIdx)
-    // }
+        render()
+        renderLettersInTray()
+    }
 
-    // function checkVerticalWin(colIdx, rowIdx){
-    //     return countAdjacent(colIdx, rowIdx, 0, -1) === 3 ? board[colIdx][rowIdx] : null
-    // }
+//Checking the Validity of the Play
+    
+    function checkPlay(){
+        if(turn === 1 && round === 1){
 
-    // function checkHorizontalWin(colIdx, rowIdx){
-    //     const adjacentCountLeft = countAdjacent(colIdx, rowIdx, -1, 0)
-    //     const adjacentCountRight = countAdjacent(colIdx, rowIdx, 1, 0)
-    //     return (adjacentCountLeft + adjacentCountRight) === 3 ? board[colIdx][rowIdx] : null
-    // }
+        }
 
-    // function checkDiagonalNWSEWin(colIdx, rowIdx){
-    //     const adjacentCountNW = countAdjacent(colIdx, rowIdx, -1, 1)
-    //     const adjacentCountSE = countAdjacent(colIdx, rowIdx, 1, -1)
-    //     return (adjacentCountNW + adjacentCountSE) === 3 ? board[colIdx][rowIdx] : null
-    // }
+        
+    }
 
-    // function checkDiagonalNESWWin(colIdx, rowIdx){
-    //     const adjacentCountNE = countAdjacent(colIdx, rowIdx, 1, 1)
-    //     const adjacentCountSW = countAdjacent(colIdx, rowIdx, -1, -1)
-    //     return (adjacentCountNE + adjacentCountSW) === 3 ? board[colIdx][rowIdx] : null
-    // }
 
-    // function countAdjacent(colIdx, rowIdx, colOffset, rowOffset){
-    //     const player = board[colIdx][rowIdx]
-    //     let count = 0;
-    //     colIdx += colOffset;
-    //     rowIdx += rowOffset;
 
-    //     while(
-    //         board[colIdx] !== undefined && //colIdx >= 0 && colIdx <= 6 //Ensure that we stay on the board (within bounds)
-    //         board[colIdx][rowIdx] !== undefined &&
-    //         board[colIdx][rowIdx] === player
-    //     ){
-    //         count++
-    //         colIdx += colOffset
-    //         rowIdx += rowOffset
-    //     }
+    // function 
 
-    //     return(count)
-    //     // console.log(player)
-    // }
+//Scoring the Play
+
+    //!NEEDS TO CALCULATE GIVEN LETTERS OTHER PLAYERS PLACED PREVIOUSLY (ALL WORDS & LETTERS FORMED)
+    function scorePlay(){
+        
+        let totalPoints = 0;
+
+        placedLetters.forEach((letter) => {
+            
+            if(letters[letter]){
+                totalPoints += letters[letter].points;
+            }
+        })
+
+        if(turn === 1){player = players[0]}else{player = players[1]} 
+
+        player.score += totalPoints //!NEEDS TO CALCULATE GIVEN LETTERS OTHER PLAYERS PLACED PREVIOUSLY (ALL WORDS & LETTERS FORMED)
+        
+    }
 
 init()
 render()
