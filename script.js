@@ -311,8 +311,44 @@
         
     }
 
+    function checkWordConnected(){
 
+    }
 
+    function checkLetterConnected(){
+
+    }
+
+    function getAdjacentCells(grid, col, row) {
+        if(col > 14 || row > 14){return}
+        console.log(col, row)
+    
+        const adjacentCells = [];
+    
+        const offsets = [ // Define offsets for adjacent cells (up, down, left, right)
+            { row: -1, col: 0 }, // Up
+            { row: 1, col: 0 },  // Down
+            { row: 0, col: -1 }, // Left
+            { row: 0, col: 1 }   // Right
+        ];
+    
+        for (const offset of offsets) {
+            const newRow = row + offset.row
+            const newCol = col + offset.col
+            
+            //guard: check if the new coordinates on the
+            if (newRow >= 0 && newRow <= 14 && newCol >= 0 && newCol <= 14) {
+                const adjacentCellContents = grid[newCol][newRow]
+                adjacentCells.push({contents: adjacentCellContents, col: newCol, row: newRow});
+                console.log(newCol, newRow)
+            }
+            
+        }
+        
+
+        return adjacentCells;
+    }
+    
     // function 
 
 //Scoring the Play
@@ -337,3 +373,9 @@
 
 init()
 render()
+
+// board.forEach(function(col, row){
+//     console.log(col, row)
+//     //try{getAdjacentCells(board, col, row)}catch(error){console.log(error.message)}
+// }
+// )
