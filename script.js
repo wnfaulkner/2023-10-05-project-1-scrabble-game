@@ -384,10 +384,30 @@
 
     function getHorizontalWord(placedLetter){
         const rowIdx = placedLetter.rowIdx
-        const rightEndColIdx = getEndIdx(placedLetter, 'right')
-        const leftEndColIdx = getEndIdx(placedLetter, 'left')
+        const rightEndColIdx = getEndIdx(placedLetter, 'right').colIdx
+        const leftEndColIdx = getEndIdx(placedLetter, 'left').colIdx
+        
 
-        const wordRange = Array.from({ length: rightEndColIdx - leftEndColIdx + 1 }, (_, index) => leftEndColIdx + index);
+
+        // //Method 1
+        // wordRange = Array.from({ length: rightEndColIdx - leftEndColIdx + 1 }, (_, i) => leftEndColIdx + i);
+        
+        // //Method 2
+        // wordRange = [...Array(rightEndColIdx - leftEndColIdx + 1).keys()].map(i => leftEndColIdx + i);
+
+        // //Method 3
+        // let wordRange = []
+        // for (let i = leftEndColIdx; i <= rightEndColIdx; i++) {
+        //     wordRange.push(i);
+        // }
+
+        //Method 4 (Weston's suggestion)
+        const wholeRange = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+        wordRange = wholeRange.slice(leftEndColIdx, rightEndColIdx+1)
+        if(wordRange.length === 1){return} //guard: should not have any 1-letter words after first play
+
+        
+        
 
         // console.log(wordRange)
         result = {rightEndColIdx, leftEndColIdx, wordRange}
@@ -415,11 +435,11 @@
         while(
             board[colIdx] !== undefined && //colIdx >= 0 && colIdx <= 6 //Ensure that we stay on the board (within bounds)
             board[colIdx][rowIdx] !== undefined &&
-            board[colIdx][rowIdx] !== ''
+            board[colIdx + offsets.colOffset][rowIdx + offsets.rowOffset] !== ''
         ){
             colIdx += offsets.colOffset
             rowIdx += offsets.rowOffset
-            console.log(rowIdx, colIdx)
+            //console.log(rowIdx, colIdx)
         }
         
         const result = {colIdx, rowIdx}

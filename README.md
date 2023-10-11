@@ -3,6 +3,8 @@
 # Play the a classic word game Scrabble! 
 Scrabble is a game that combines vocabulary knowledge, word formation, and strategy. The main objective of Scrabble is to create words on the game board and score points based on the letters used and their placement. There are 100 letter tiles, each with a letter and a point value. The game board is a square grid with various special squares that offer bonus points for letter or word placement.
 
+Play the game online at: https://wnfaulkner.github.io/2023-10-05-project-1-scrabble-game/
+
 ## Gameplay:
 
 * Players draw seven letter tiles from a bag to start the game.
