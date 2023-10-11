@@ -377,7 +377,7 @@
     }
 
     function getNewWordsCreatedByPlay(){
-        if(turn === 1 && round === 1 && placedLetters.length === 1){return(selectedLetters[0].letter)} //guard: only time can play a one-letter word (and therefore don't have to search & find created words) is on the first turn.
+        if(turn === 1 && round === 1 && placedLetters.length === 1){return} //guard: only time can play a one-letter word (and therefore don't have to search & find created words) is on the first turn.
         // newWords = [...placedLetters.map((placedLetter) => getEndIdx(placedLetter, 'right'))]
         // return(newWords)
     }
@@ -386,31 +386,14 @@
         const rowIdx = placedLetter.rowIdx
         const rightEndColIdx = getEndIdx(placedLetter, 'right').colIdx
         const leftEndColIdx = getEndIdx(placedLetter, 'left').colIdx
-        
-
-
-        // //Method 1
-        // wordRange = Array.from({ length: rightEndColIdx - leftEndColIdx + 1 }, (_, i) => leftEndColIdx + i);
-        
-        // //Method 2
-        // wordRange = [...Array(rightEndColIdx - leftEndColIdx + 1).keys()].map(i => leftEndColIdx + i);
-
-        // //Method 3
-        // let wordRange = []
-        // for (let i = leftEndColIdx; i <= rightEndColIdx; i++) {
-        //     wordRange.push(i);
-        // }
-
-        //Method 4 (Weston's suggestion)
         const wholeRange = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
-        wordRange = wholeRange.slice(leftEndColIdx, rightEndColIdx+1)
-        if(wordRange.length === 1){return} //guard: should not have any 1-letter words after first play
+        wordRange = wholeRange.slice(leftEndColIdx, rightEndColIdx + 1) //Method 4 (Weston's suggestion)
+        //if(turn !== 1 && round !== 1 && wordRange.length === 1){return} //guard: should not have any 1-letter words after first play
 
-        
-        
+        wordBoardCells = wordRange.map(item => [item, rowIdx])//.map(function(item){})
+        word = wordBoardCells.map(item => board[item[0]][item[1]]).join('')
 
-        // console.log(wordRange)
-        result = {rightEndColIdx, leftEndColIdx, wordRange}
+        result = word //{rightEndColIdx, leftEndColIdx, wordRange, wordBoardCells, word}
         return(result)
     }
 
