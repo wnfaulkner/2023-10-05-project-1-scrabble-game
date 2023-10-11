@@ -49,6 +49,9 @@
         ['','','','','','','','','','','','','','',''],
         ['','','','','','','','','','','','','','','']		
     ]
+
+    //import wordList from './wordlist_json.json' assert { type: 'json' }
+
     
 /*----- state variables -----*/
 
@@ -316,11 +319,11 @@
         const checkFirstPlayResult = checkFirstPlay() 
         const checkStraightPlayResult = checkStraightPlay()
         const checkPlayConnectedResult = checkPlayConnected()
-        //const checkValidWordsResult = checkValidWords()
-        checkValidWords()
-
-        const result = checkFirstPlayResult && checkStraightPlayResult && checkPlayConnectedResult
-        // console.log(checkFirstPlayResult, checkStraightPlayResult, checkPlayConnectedResult, result)
+        const checkValidWordsResult = checkValidWords()
+        
+        const result = checkFirstPlayResult && checkStraightPlayResult && checkPlayConnectedResult && checkValidWordsResult
+        
+        //console.log(checkValidWords())
         return(result)
     }
 
@@ -358,13 +361,13 @@
 
     function checkPlayConnected(){
         if(turn === 1 && round === 1){return(true)} //guard: if this is the first play, return 'true' (can't be connected on the first play)
-        result = placedLetters.map((item) => checkLetterConnected(item)).some((element) => element === true)
+        const result = placedLetters.map((item) => checkLetterConnected(item)).some((element) => element === true)
         return(result)
     }
 
     function checkLetterConnected(placedLetter){
         const adjacentCells = getAdjacentCells(boardAsOfEndOfLastTurn, placedLetter.colIdx, placedLetter.rowIdx)
-        result = adjacentCells.map((item) => item.contents !== '').some((element) => element === true)
+        const result = adjacentCells.map((item) => item.contents !== '').some((element) => element === true)
         // console.log(result)
         return(result)
     }
@@ -372,22 +375,50 @@
     //Checking Validity of New Words Created by the Play
 
     function checkValidWords(){
-        wordsCreatedByPlay = getNewWordsCreatedByPlay()[0]
+        const wordsCreatedByPlay = getNewWordsCreatedByPlay()
 
-        const fs = require('fs')
+        return(wordsCreatedByPlay) //! will need updating if can get to dictionary checking
+        // const fs = require('fs');
 
-        fs.readFile('wordlist.txt', function (err, data) {
-            if (err) throw err;
-            if(data.includes(wordsCreatedByPlay)){
-             console.log(data)
-            }
-          });
+        // // The string you want to search for
+        // const searchString = 'example';
+        
+        // // Read the JSON file containing the list of words
+        // fs.readFile('wordlist_json.json', 'utf-8', (err, data) => {
+        //   if (err) {
+        //     console.error("Error reading the file:", err);
+        //     return;
+        //   }
+        
+        //   try {
+        //     // Parse the JSON data into a JavaScript object
+        //     const wordList = JSON.parse(data);
+        
+        //     // Check if the searchString exists in the word list
+        //     if (wordList.includes(searchString)) {
+        //       console.log(`'${searchString}' exists in the word list.`);
+        //     } else {
+        //       console.log(`'${searchString}' does not exist in the word list.`);
+        //     }
+        //   } catch (error) {
+        //     console.error("Error parsing JSON:", error);
+        //   }
+        // });
+
+        // const fs = require('fs')
+
+        // fs.readFile('worlist_json.json', function (err, data) {
+        //     if (err) throw err;
+        //     if(data.includes(wordsCreatedByPlay)){
+        //      console.log(data)
+        //     }
+        //   });
     }
 
     function getNewWordsCreatedByPlay(){
-        newHorizontalWords = [...new Set(placedLetters.map(item => getHorizontalWord(item)))]
-        newVerticalWords = [...new Set(placedLetters.map(item => getVerticalWord(item)))]
-        newWords = [...newHorizontalWords, ...newVerticalWords].filter((item) => item !== undefined)
+        const newHorizontalWords = [...new Set(placedLetters.map(item => getHorizontalWord(item)))]
+        const newVerticalWords = [...new Set(placedLetters.map(item => getVerticalWord(item)))]
+        const newWords = [...newHorizontalWords, ...newVerticalWords].filter((item) => item !== undefined)
         return(newWords)
     }
 
@@ -396,12 +427,12 @@
         const rightEndColIdx = getEndIdx(placedLetter, 'right').colIdx
         const leftEndColIdx = getEndIdx(placedLetter, 'left').colIdx
         const wholeRange = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
-        wordRange = wholeRange.slice(leftEndColIdx, rightEndColIdx + 1) //Method 4 (Weston's suggestion)
+        const wordRange = wholeRange.slice(leftEndColIdx, rightEndColIdx + 1) //Method 4 (Weston's suggestion)
 
         if(turn !== 1 && wordRange.length === 1){return} //guard: should only be able to play 1-letter word on a blank board (first valid play)
         
-        wordBoardCells = wordRange.map(item => [item, rowIdx])
-        word = wordBoardCells.map(item => board[item[0]][item[1]]).join('')
+        const wordBoardCells = wordRange.map(item => [item, rowIdx])
+        const word = wordBoardCells.map(item => board[item[0]][item[1]]).join('')
  
         return(word)
     }
@@ -412,15 +443,14 @@
         // const topEndRowIdx = 
         // const bottomEndRowIdx = 
         const wholeRange = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
-        wordRange = wholeRange.slice(getEndIdx(placedLetter, 'up').rowIdx, getEndIdx(placedLetter, 'down').rowIdx + 1) //Method 4 (Weston's suggestion)
+        const wordRange = wholeRange.slice(getEndIdx(placedLetter, 'up').rowIdx, getEndIdx(placedLetter, 'down').rowIdx + 1) //Method 4 (Weston's suggestion)
 
         if(wordRange.length === 1){return} //guard: should only be able to play 1-letter word on a blank board (first valid play)
         
-        wordBoardCells = wordRange.map(item => [colIdx, item])
-        word = wordBoardCells.map(item => board[item[0]][item[1]]).join('')
+        const wordBoardCells = wordRange.map(item => [colIdx, item])
+        const word = wordBoardCells.map(item => board[item[0]][item[1]]).join('')
 
-        result = word //{rightEndColIdx, bottomEndRowIdx, wordRange, wordBoardCells, word}
-        return(result)
+        return(word)
     }
 
     function getEndIdx(placedLetter, direction){
@@ -478,10 +508,6 @@
 
     function getAdjacentCells(grid, col, row, direction) {
         if(col > 14 || row > 14){return}
-        
-        // if (direction !== 'all' && direction !== 'horizontal' && direction !== 'vertical') { // Check if the direction is valid
-        //     throw new Error('Invalid direction. Accepted values are "all", "horizontal", or "vertical".');
-        // }
 
         //Create correct offsets to provide only results for the selected direction
         let offsets 
