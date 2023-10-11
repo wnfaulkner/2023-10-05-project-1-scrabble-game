@@ -143,9 +143,9 @@
         boardContainer.innerHTML = ''
 
         board.forEach(
-            function(colArr, colIdx){
+            function(colArr, rowIdx){
                 colArr.forEach(
-                    function(cellValue, rowIdx){
+                    function(cellValue, colIdx){
                         const cell = document.createElement('div')
                         cell.classList.add('board-cell')
                         cell.id = `${colIdx}_${rowIdx}`
@@ -275,7 +275,7 @@
         if(turn === 1){player = players[0]}else{player = players[1]} 
 
         //STORAGE FOR USE IN OTHER FUNCTIONS
-        const placedLetter = {letter: selectedLetters[0], col: boardCellColIdx, row: boardCellRowIdx}
+        const placedLetter = {letter: selectedLetters[0], colIdx: boardCellColIdx, rowIdx: boardCellRowIdx}
         placedLetters.push(placedLetter) //add placed letter to placedLetters
         
         //CLEANUP
@@ -317,26 +317,26 @@
         const checkStraightPlayResult = checkStraightPlay()
         const checkPlayConnectedResult = checkPlayConnected()
         // const checkValidWordsResult = checkValidWords()
-        console.log(checkValidWords())
+        // console.log(placedLetters.map((placedLetter) => getEndIdx(placedLetters, 'right')))
+        console.log(getHorizontalWord(placedLetters[0]))
 
         const result = checkFirstPlayResult && checkStraightPlayResult && checkPlayConnectedResult
-        // console.log(boardAsOfEndOfLastTurn, checkPlayConnectedResult, result)
+        // console.log(checkFirstPlayResult, checkStraightPlayResult, checkPlayConnectedResult, result)
         return(result)
-
     }
 
     //Checking Validity of Placement
     //! NEED TO ACCOUNT FOR STATE: FIRST PLAYER SUBMITS INVALID PLAY SO SECOND PLAYER'S TURN NEEDS TO GET CHECKED WITH CHECKFIRSTPLAY
     function checkFirstPlay(){
         if(turn !== 1 || round !== 1){return(true)} //guard: if this is not the first play, return 'true' (these checks no longer applicable)
-        const cols = placedLetters.map((item) => item.col)
-        const rows = placedLetters.map((item) => item.row)
+        const cols = placedLetters.map((item) => item.colIdx)
+        const rows = placedLetters.map((item) => item.rowIdx)
 
         const uniqueCols = [... new Set(cols)]
         const uniqueRows = [... new Set(rows)]
 
         let isHorizontalPlay = false
-        if(uniqueCols.length === 1){isHorizontalPlay = true} //check if play is horizontal
+        if(uniqueRows.length === 1){isHorizontalPlay = true} //check if play is horizontal
 
         let coversCentralSquare = false
         if(uniqueCols.includes(7) && uniqueRows.includes(7)){coversCentralSquare = true}
@@ -347,8 +347,8 @@
     }
 
     function checkStraightPlay(){
-        const cols = placedLetters.map((item) => item.col)
-        const rows = placedLetters.map((item) => item.row)
+        const cols = placedLetters.map((item) => item.colIdx)
+        const rows = placedLetters.map((item) => item.rowIdx)
 
         const uniqueCols = [... new Set(cols)]
         const uniqueRows = [... new Set(rows)]
@@ -364,7 +364,7 @@
     }
 
     function checkLetterConnected(placedLetter){
-        const adjacentCells = getAdjacentCells(boardAsOfEndOfLastTurn, placedLetter.col, placedLetter.row)
+        const adjacentCells = getAdjacentCells(boardAsOfEndOfLastTurn, placedLetter.colIdx, placedLetter.rowIdx)
         result = adjacentCells.map((item) => item.contents !== '').some((element) => element === true)
         // console.log(result)
         return(result)
@@ -378,33 +378,52 @@
 
     function getNewWordsCreatedByPlay(){
         if(turn === 1 && round === 1 && placedLetters.length === 1){return(selectedLetters[0].letter)} //guard: only time can play a one-letter word (and therefore don't have to search & find created words) is on the first turn.
-        newWords = [...placedLetters.map((placedLetter) => getLettersToRight(placedLetter))]
-        return(newWords)
+        // newWords = [...placedLetters.map((placedLetter) => getEndIdx(placedLetter, 'right'))]
+        // return(newWords)
     }
 
-    function getLettersToRight(placedLetter){
+    function getHorizontalWord(placedLetter){
+        const rowIdx = placedLetter.rowIdx
+        const rightEndColIdx = getEndIdx(placedLetter, 'right')
+        const leftEndColIdx = getEndIdx(placedLetter, 'left')
 
-        // let adjacentCellHasContent = true
-        let colIdx = placedLetter.col + 1
-        let rowIdx = placeLetter.row
-        let lettersToRight = []
-        let i = 1
+        const wordRange = Array.from({ length: rightEndColIdx - leftEndColIdx + 1 }, (_, index) => leftEndColIdx + index);
+
+        // console.log(wordRange)
+        result = {rightEndColIdx, leftEndColIdx, wordRange}
+        return(result)
+    }
+
+    function getEndIdx(placedLetter, direction){
+        const allowedDirections = ['right','left','up','down']
+        if (!allowedDirections.includes(direction)) { // Check if the direction is valid
+            throw new Error('Invalid direction. Accepted values are "right", "left", "up" or "down".');
+        }
+
+        let offsets 
+        switch(direction){
+            case 'right': offsets = {rowOffset: 0, colOffset: 1}; break;
+            case 'left': offsets = {rowOffset: 0, colOffset: -1}; break;
+            case 'up': offsets = {rowOffset: 0, colOffset: 1}; break;
+            case 'down': offsets = {rowOffset: 0, colOffset: 1};
+        }
+
+        let colIdx = placedLetter.colIdx
+        let rowIdx = placedLetter.rowIdx
+        // let lettersToRight = []
         
         while(
             board[colIdx] !== undefined && //colIdx >= 0 && colIdx <= 6 //Ensure that we stay on the board (within bounds)
             board[colIdx][rowIdx] !== undefined &&
             board[colIdx][rowIdx] !== ''
         ){
-            // const letter = 
-            lettersToRight.push(board[colIdx][rowIdx])
-            colIdx += 1   
-            i += 1
-            // adjacentCellHasContent = nextLetter.contents !== ''
-                     
+            colIdx += offsets.colOffset
+            rowIdx += offsets.rowOffset
+            console.log(rowIdx, colIdx)
         }
-        console.log(i, colIdx, lettersToRight)
         
-        // return(lettersToRight)
+        const result = {colIdx, rowIdx}
+        return(result)
     }
 
 //Scoring the Play
