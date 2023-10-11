@@ -316,9 +316,8 @@
         const checkFirstPlayResult = checkFirstPlay() 
         const checkStraightPlayResult = checkStraightPlay()
         const checkPlayConnectedResult = checkPlayConnected()
-        // const checkValidWordsResult = checkValidWords()
-        // console.log(placedLetters.map((placedLetter) => getEndIdx(placedLetters, 'right')))
-        console.log(getHorizontalWord(placedLetters[0]))
+        //const checkValidWordsResult = checkValidWords()
+        console.log(checkValidWords())
 
         const result = checkFirstPlayResult && checkStraightPlayResult && checkPlayConnectedResult
         // console.log(checkFirstPlayResult, checkStraightPlayResult, checkPlayConnectedResult, result)
@@ -377,9 +376,10 @@
     }
 
     function getNewWordsCreatedByPlay(){
-        if(turn === 1 && round === 1 && placedLetters.length === 1){return} //guard: only time can play a one-letter word (and therefore don't have to search & find created words) is on the first turn.
-        // newWords = [...placedLetters.map((placedLetter) => getEndIdx(placedLetter, 'right'))]
-        // return(newWords)
+        newHorizontalWords = [...new Set(placedLetters.map(item => getHorizontalWord(item)))]
+        newVerticalWords = [...new Set(placedLetters.map(item => getVerticalWord(item)))]
+        newWords = [...newHorizontalWords, ...newVerticalWords].filter((item) => item !== undefined)
+        return(newWords)
     }
 
     function getHorizontalWord(placedLetter){
@@ -388,12 +388,29 @@
         const leftEndColIdx = getEndIdx(placedLetter, 'left').colIdx
         const wholeRange = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
         wordRange = wholeRange.slice(leftEndColIdx, rightEndColIdx + 1) //Method 4 (Weston's suggestion)
-        //if(turn !== 1 && round !== 1 && wordRange.length === 1){return} //guard: should not have any 1-letter words after first play
 
-        wordBoardCells = wordRange.map(item => [item, rowIdx])//.map(function(item){})
+        if(turn !== 1 && wordRange.length === 1){return} //guard: should only be able to play 1-letter word on a blank board (first valid play)
+        
+        wordBoardCells = wordRange.map(item => [item, rowIdx])
+        word = wordBoardCells.map(item => board[item[0]][item[1]]).join('')
+ 
+        return(word)
+    }
+
+    function getVerticalWord(placedLetter){
+        if(turn === 1 && round === 1){return} //guard: no vertical words on first play
+        const colIdx = placedLetter.colIdx
+        // const topEndRowIdx = 
+        // const bottomEndRowIdx = 
+        const wholeRange = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+        wordRange = wholeRange.slice(getEndIdx(placedLetter, 'up').rowIdx, getEndIdx(placedLetter, 'down').rowIdx + 1) //Method 4 (Weston's suggestion)
+
+        if(wordRange.length === 1){return} //guard: should only be able to play 1-letter word on a blank board (first valid play)
+        
+        wordBoardCells = wordRange.map(item => [colIdx, item])
         word = wordBoardCells.map(item => board[item[0]][item[1]]).join('')
 
-        result = word //{rightEndColIdx, leftEndColIdx, wordRange, wordBoardCells, word}
+        result = word //{rightEndColIdx, bottomEndRowIdx, wordRange, wordBoardCells, word}
         return(result)
     }
 
@@ -407,8 +424,8 @@
         switch(direction){
             case 'right': offsets = {rowOffset: 0, colOffset: 1}; break;
             case 'left': offsets = {rowOffset: 0, colOffset: -1}; break;
-            case 'up': offsets = {rowOffset: 0, colOffset: 1}; break;
-            case 'down': offsets = {rowOffset: 0, colOffset: 1};
+            case 'up': offsets = {rowOffset: -1, colOffset: 0}; break;
+            case 'down': offsets = {rowOffset: 1, colOffset: 0};
         }
 
         let colIdx = placedLetter.colIdx
