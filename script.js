@@ -317,7 +317,7 @@
         const checkStraightPlayResult = checkStraightPlay()
         const checkPlayConnectedResult = checkPlayConnected()
         //const checkValidWordsResult = checkValidWords()
-        console.log(checkValidWords())
+        checkValidWords()
 
         const result = checkFirstPlayResult && checkStraightPlayResult && checkPlayConnectedResult
         // console.log(checkFirstPlayResult, checkStraightPlayResult, checkPlayConnectedResult, result)
@@ -372,7 +372,16 @@
     //Checking Validity of New Words Created by the Play
 
     function checkValidWords(){
-        return(getNewWordsCreatedByPlay())
+        wordsCreatedByPlay = getNewWordsCreatedByPlay()[0]
+
+        const fs = require('fs')
+
+        fs.readFile('wordlist.txt', function (err, data) {
+            if (err) throw err;
+            if(data.includes(wordsCreatedByPlay)){
+             console.log(data)
+            }
+          });
     }
 
     function getNewWordsCreatedByPlay(){
