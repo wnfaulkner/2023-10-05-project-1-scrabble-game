@@ -275,7 +275,7 @@
         if(turn === 1){player = players[0]}else{player = players[1]} 
 
         //STORAGE FOR USE IN OTHER FUNCTIONS
-        const placedLetter = {letter: selectedLetters[0], xCoord: boardCellColIdx, yCoord: boardCellRowIdx}
+        const placedLetter = {letter: selectedLetters[0], col: boardCellColIdx, row: boardCellRowIdx}
         placedLetters.push(placedLetter) //add placed letter to placedLetters
         
         //CLEANUP
@@ -325,22 +325,21 @@
 
     }
 
-
     //Checking Validity of Placement
     //! NEED TO ACCOUNT FOR STATE: FIRST PLAYER SUBMITS INVALID PLAY SO SECOND PLAYER'S TURN NEEDS TO GET CHECKED WITH CHECKFIRSTPLAY
     function checkFirstPlay(){
         if(turn !== 1 || round !== 1){return(true)} //guard: if this is not the first play, return 'true' (these checks no longer applicable)
-        const xCoords = placedLetters.map((item) => item.xCoord)
-        const yCoords = placedLetters.map((item) => item.yCoord)
+        const cols = placedLetters.map((item) => item.col)
+        const rows = placedLetters.map((item) => item.row)
 
-        const uniqueXCoords = [... new Set(xCoords)]
-        const uniqueYCoords = [... new Set(yCoords)]
+        const uniqueCols = [... new Set(cols)]
+        const uniqueRows = [... new Set(rows)]
 
         let isHorizontalPlay = false
-        if(uniqueXCoords.length === 1){isHorizontalPlay = true} //check if play is horizontal
+        if(uniqueCols.length === 1){isHorizontalPlay = true} //check if play is horizontal
 
         let coversCentralSquare = false
-        if(uniqueXCoords.includes(7) && uniqueYCoords.includes(7)){coversCentralSquare = true}
+        if(uniqueCols.includes(7) && uniqueRows.includes(7)){coversCentralSquare = true}
 
         const result = isHorizontalPlay && coversCentralSquare
 
@@ -348,13 +347,13 @@
     }
 
     function checkStraightPlay(){
-        const xCoords = placedLetters.map((item) => item.xCoord)
-        const yCoords = placedLetters.map((item) => item.yCoord)
+        const cols = placedLetters.map((item) => item.col)
+        const rows = placedLetters.map((item) => item.row)
 
-        const uniqueXCoords = [... new Set(xCoords)]
-        const uniqueYCoords = [... new Set(yCoords)]
+        const uniqueCols = [... new Set(cols)]
+        const uniqueRows = [... new Set(rows)]
 
-        const result = uniqueXCoords.length === 1 || uniqueYCoords.length === 1 //check if play is in either one column or one row
+        const result = uniqueCols.length === 1 || uniqueRows.length === 1 //check if play is in either one column or one row
         return(result)
     }
 
@@ -365,7 +364,7 @@
     }
 
     function checkLetterConnected(placedLetter){
-        const adjacentCells = getAdjacentCells(boardAsOfEndOfLastTurn, placedLetter.xCoord, placedLetter.yCoord)
+        const adjacentCells = getAdjacentCells(boardAsOfEndOfLastTurn, placedLetter.col, placedLetter.row)
         result = adjacentCells.map((item) => item.contents !== '').some((element) => element === true)
         // console.log(result)
         return(result)
@@ -378,14 +377,34 @@
     }
 
     function getNewWordsCreatedByPlay(){
-        newWords = [...placedLetters.map((placedLetter) => getHorizontalWordForLetter(placedLetter))]
+        if(turn === 1 && round === 1 && placedLetters.length === 1){return(selectedLetters[0].letter)} //guard: only time can play a one-letter word (and therefore don't have to search & find created words) is on the first turn.
+        newWords = [...placedLetters.map((placedLetter) => getLettersToRight(placedLetter))]
         return(newWords)
     }
 
-    function getHorizontalWordForLetter(placedLetter){
+    function getLettersToRight(placedLetter){
+
+        // let adjacentCellHasContent = true
+        let colIdx = placedLetter.col + 1
+        let rowIdx = placeLetter.row
+        let lettersToRight = []
+        let i = 1
         
+        while(
+            board[colIdx] !== undefined && //colIdx >= 0 && colIdx <= 6 //Ensure that we stay on the board (within bounds)
+            board[colIdx][rowIdx] !== undefined &&
+            board[colIdx][rowIdx] !== ''
+        ){
+            // const letter = 
+            lettersToRight.push(board[colIdx][rowIdx])
+            colIdx += 1   
+            i += 1
+            // adjacentCellHasContent = nextLetter.contents !== ''
+                     
+        }
+        console.log(i, colIdx, lettersToRight)
         
-        return(placedLetter.letter)
+        // return(lettersToRight)
     }
 
 //Scoring the Play
@@ -422,63 +441,55 @@
             
             case 'all':
             offsets = [ // Define offsets for adjacent cells (up, down, left, right)
-                { row: -1, col: 0 }, // Up
-                { row: 1, col: 0 },  // Down
-                { row: 0, col: -1 }, // Left
-                { row: 0, col: 1 }   // Right
+                {row: -1, col: 0}, // Up
+                {row: 1, col: 0},  // Down
+                {row: 0, col: -1}, // Left
+                {row: 0, col: 1}   // Right
             ]; break;
             
             case 'horizontal':
             offsets = [ // Define offsets for adjacent cells (left, right)
-                { row: 0, col: -1 }, // Left
-                { row: 0, col: 1 }   // Right
+                {row: 0, col: -1}, // Left
+                {row: 0, col: 1}   // Right
+            ]; break;
+
+            case 'right':
+            offsets = [ // Define offsets for adjacent cells (left, right)
+                {row: 0, col: 1}   // Right
+            ]; break;
+
+            case 'left':
+            offsets = [ // Define offsets for adjacent cells (left, right)
+                {row: 0, col: -1}   // Right
             ]; break;
          
             case 'vertical':
             offsets = [ // Define offsets for adjacent cells (up, down)
-                { row: -1, col: 0 }, // Up
-                { row: 1, col: 0 },  // Down
+                {row: -1, col: 0}, // Up
+                {row: 1, col: 0},  // Down
+            ]; break;
+
+            case 'up':
+            offsets = [ // Define offsets for adjacent cells (left, right)
+                {row: 1, col: 0}   // Right
+            ]; break;
+
+            case 'down':
+            offsets = [ // Define offsets for adjacent cells (left, right)
+                {row: -1, col: 0}   // Right
             ]; break;
 
             default:
             offsets = [ // Define offsets for adjacent cells (up, down, left, right)
-                { row: -1, col: 0 }, // Up
-                { row: 1, col: 0 },  // Down
-                { row: 0, col: -1 }, // Left
-                { row: 0, col: 1 }   // Right
+                {row: -1, col: 0}, // Up
+                {row: 1, col: 0},  // Down
+                {row: 0, col: -1}, // Left
+                {row: 0, col: 1}   // Right
             ];
         
         }
 
         const adjacentCells = [] //empty object for storing results of loop
-        for (const offset of offsets) {
-            const newRow = row + offset.row
-            const newCol = col + offset.col
-            
-            //guard: check if the new coordinates on the
-            if (newRow >= 0 && newRow <= 14 && newCol >= 0 && newCol <= 14) {
-                const adjacentCellContents = grid[newCol][newRow]
-                adjacentCells.push({contents: adjacentCellContents, col: newCol, row: newRow});
-            }
-            
-        }
-        
-
-        return adjacentCells;
-    }
-
-    function getAdjacentCellsHorizontal(grid, col, row) {
-        if(col > 14 || row > 14){return}
-
-        const adjacentCells = [];
-
-        const offsets = [ // Define offsets for adjacent cells (up, down, left, right)
-            { row: -1, col: 0 }, // Up
-            { row: 1, col: 0 },  // Down
-            { row: 0, col: -1 }, // Left
-            { row: 0, col: 1 }   // Right
-        ];
-
         for (const offset of offsets) {
             const newRow = row + offset.row
             const newCol = col + offset.col
