@@ -290,11 +290,9 @@
 
     function submitPlay(){
         if(placedLetters.length === 0 && !exchangingLetters){return} //guard: if the player has not placed any letters and is not doing a letter exchange, don't do anything
-        
-         
 
+        //1. Check if play is valid, and if not, return placed letters to player's tray and end turn with no change in score.
         if(!checkPlay()){
-            
             
             board = boardAsOfEndOfLastTurn //Remove placed letters from board
 
@@ -305,9 +303,12 @@
             render()
             return  
         }
-        // scorePlay()
         
+        //2. Score the play
+        if(turn === 1){player = players[0]}else{player = players[1]} 
+        player.score += scorePlay()
         
+        // checkWin()
         endTurnUpdates()
         render()
         
@@ -322,8 +323,8 @@
         const checkValidWordsResult = checkValidWords()
         
         const result = checkFirstPlayResult && checkStraightPlayResult && checkPlayConnectedResult && checkValidWordsResult
-        
-        //console.log(checkValidWords())
+
+        console.log(checkFirstPlayResult, checkStraightPlayResult, checkPlayConnectedResult)
         return(result)
     }
 
@@ -361,16 +362,23 @@
 
     function checkPlayConnected(){
         if(turn === 1 && round === 1){return(true)} //guard: if this is the first play, return 'true' (can't be connected on the first play)
-        const result = placedLetters.map((item) => checkLetterConnected(item)).some((element) => element === true)
+        const result = placedLetters.map((item) => checkLetterConnectedToPreviouslyPlacedLetters(item)).some((element) => element === true)
         return(result)
     }
 
-    function checkLetterConnected(placedLetter){
+    function checkLetterConnectedToPreviouslyPlacedLetters(placedLetter){
         const adjacentCells = getAdjacentCells(boardAsOfEndOfLastTurn, placedLetter.colIdx, placedLetter.rowIdx)
         const result = adjacentCells.map((item) => item.contents !== '').some((element) => element === true)
         // console.log(result)
         return(result)
     }
+
+    // function checkLetterConnectedToPlay(placedLetter){
+    //     const adjacentCells = getAdjacentCells(boardAsOfEndOfLastTurn, placedLetter.colIdx, placedLetter.rowIdx)
+    //     const result = adjacentCells.map((item) => item.contents !== '').some((element) => element === true)
+    //     // console.log(result)
+    //     return(result)
+    // }
 
     //Checking Validity of New Words Created by the Play
 
@@ -429,8 +437,8 @@
         const wholeRange = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
         const wordRange = wholeRange.slice(leftEndColIdx, rightEndColIdx + 1) //Method 4 (Weston's suggestion)
 
-        if(turn !== 1 && wordRange.length === 1){return} //guard: should only be able to play 1-letter word on a blank board (first valid play)
-        
+        if(wordRange.length === 1){return} //guard: should only be able to play 1-letter word on a blank board (first valid play)
+        //turn !== 1 && round !== 1 && 
         const wordBoardCells = wordRange.map(item => [item, rowIdx])
         const word = wordBoardCells.map(item => board[item[0]][item[1]]).join('')
  
@@ -488,20 +496,19 @@
 //Scoring the Play
     //!NEEDS TO CALCULATE GIVEN LETTERS OTHER PLAYERS PLACED PREVIOUSLY (ALL WORDS & LETTERS FORMED)
     function scorePlay(){
+        const wordsCreatedByPlay = getNewWordsCreatedByPlay()
+        const scoreLetters = getNewWordsCreatedByPlay().flatMap(word => word.split(''))
         
-        let totalPoints = 0;
+        let playPoints = 0;
 
-        placedLetters.forEach((letter) => {
+        scoreLetters.forEach((letter) => {
             
             if(letters[letter]){
-                totalPoints += letters[letter].points;
+                playPoints += letters[letter].points;
             }
         })
 
-        if(turn === 1){player = players[0]}else{player = players[1]} 
-
-        player.score += totalPoints //!NEEDS TO CALCULATE GIVEN LETTERS OTHER PLAYERS PLACED PREVIOUSLY (ALL WORDS & LETTERS FORMED)
-        
+        return(playPoints)
     }
 
 //Other Functions (often useful in more than one of the above)
