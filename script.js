@@ -66,19 +66,22 @@
     let exchangingLetters = false //toggle variable that tells us whether the player is in the middle of a letter exchange, to help put guardrails on functions
     let boardAsOfEndOfLastTurn = blankBoard
     const players = [
-        {name: 'One', turn: 0, score: 0, letters: []},
-        {name: 'Two', turn: 1, score: 0, letters: []}
+        {name: 'One', turn: 1, score: 0, letters: []},
+        {name: 'Two', turn: 2, score: 0, letters: []}
     ]
+    let letterBag;
 
     // Expand letters object into an array containing the actual letter tiles
-    let letterBag = [];
+    function createLetterBag(){
+        letterBag = [];
 
-    for (const letter in letters) {
-        const letterData = letters[letter];
-        const { count } = letterData; // Extract the 'count' property
-        
-        for (let i = 0; i < count; i++) { // Push the letter into the array 'count' number of times
-            letterBag.push(letter);
+        for (const letter in letters) {
+            const letterData = letters[letter];
+            const { count } = letterData; // Extract the 'count' property
+            
+            for (let i = 0; i < count; i++) { // Push the letter into the array 'count' number of times
+                letterBag.push(letter);
+            }
         }
     }
     
@@ -87,6 +90,7 @@
 
     const refillLettersButton = document.getElementById('select-letters-button')
     const submitPlayButton = document.getElementById('submit-play-button')
+    const passTurnButton = document.getElementById('pass-turn-button')
     const playAgainButton = document.getElementById('play-again-button')
     
     const boardContainer = document.getElementById('board-container')
@@ -104,9 +108,9 @@
     )
     document.getElementById('letter-tray').addEventListener('click',selectLetter)
     document.getElementById('board-container').addEventListener('click',placeLetter)
+    document.getElementById('pass-turn-button').addEventListener('click', endTurnUpdates)
     submitPlayButton.addEventListener('click', submitPlay)
-        
-    //playAgainBtn.addEventListener('click', init)
+    playAgainButton.addEventListener('click', init)
 
 
 /*----- functions -----*/
@@ -115,7 +119,23 @@
 
     function init () {
         //Rotate 90 degrees counter-clockwise and array is visualization of the board
-        board = blankBoard
+        board = [
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','',''],
+            ['','','','','','','','','','','','','','','']		
+        ]
 
         turn = 1
         round = 1
@@ -129,11 +149,16 @@
         placedLetters = []
         refillLettersButtonClicked = false
         exchangingLetters = false
+
+        createLetterBag()
+
+        render()
     }
 
 //Visualize all state in the DOM
 
     function render(){
+        renderWinMessage()
         renderScores()
         renderTurnIndicator()
         renderBoard()
@@ -173,9 +198,9 @@
     }
 
     function renderControls(){
-            
+        refillLettersButton.style.visibility = !refillLettersButtonClicked && letterBag.length !== 0 ? 'visible':'hidden'
         submitPlayButton.style.visibility = !winner && !exchangingLetters ? 'visible':'hidden'
-        refillLettersButton.style.visibility = refillLettersButtonClicked ? 'hidden':'visible'
+        passTurnButton.style.visibility = letterBag.length === 0 && !winner ? 'visible':'hidden'
         playAgainButton.style.visibility = winner ? 'visible':'hidden'
 
     }
@@ -211,8 +236,11 @@
         document.getElementById('number-of-letters-left-in-bag').innerText = numLettersInLetterBag
     }
 
-    function renderMessages(){
-        
+    function renderWinMessage(){
+        letterTray.style.visibility = winner ? 'hidden':'visible'
+        document.getElementById('letters-left-indicator').style.visibility = !winner ? 'visible':'hidden' //hide letter bag indicator
+        document.getElementById('win-message').style.visibility = winner ? 'visible':'hidden' //show a winning message
+        document.getElementById('win-message').innerHTML = winner ? `Player ${winner.name} Wins!` : ''
     }
 
 //User Interactions
@@ -220,7 +248,7 @@
     function refillLettersFromBag(){
         if(turn === 1){player = players[0]}else{player = players[1]} 
        
-        const numLettersToRefill = 7 - player.letters.length //number of letters to be added to the player's tray
+        let numLettersToRefill = 7 - player.letters.length //number of letters to be added to the player's tray
         
         if(numLettersToRefill === 0){return} //guard: in case refillLettersButton gets clicked more than once
         if(numLettersToRefill > letterBag.length){numLettersToRefill = letterBag.length} //guard: for when players get down to only having less than seven letters left in the bag
@@ -300,7 +328,6 @@
             player.letters = [...player.letters, ...placedLetters.map((element) => element.letter)] //return placed letter to player's tray
 
             endTurnUpdates()
-            render()
             return  
         }
         
@@ -308,9 +335,8 @@
         if(turn === 1){player = players[0]}else{player = players[1]} 
         player.score += scorePlay()
         
-        // checkWin()
+        checkWin()
         endTurnUpdates()
-        render()
         
     }
 
@@ -373,6 +399,7 @@
         return(result)
     }
 
+    //!Need to account for situation where letters are all placed in the same column/row, and some next to previously placed letters, but at least one is separated off from the other placed letters (island letters), even if it is next to a differnt previously placed letter
     // function checkLetterConnectedToPlay(placedLetter){
     //     const adjacentCells = getAdjacentCells(boardAsOfEndOfLastTurn, placedLetter.colIdx, placedLetter.rowIdx)
     //     const result = adjacentCells.map((item) => item.contents !== '').some((element) => element === true)
@@ -482,7 +509,7 @@
         while(
             board[colIdx] !== undefined && //colIdx >= 0 && colIdx <= 6 //Ensure that we stay on the board (within bounds)
             board[colIdx][rowIdx] !== undefined &&
-            board[colIdx + offsets.colOffset][rowIdx + offsets.rowOffset] !== ''
+            board[colIdx][rowIdx] !== ''
         ){
             colIdx += offsets.colOffset
             rowIdx += offsets.rowOffset
@@ -494,21 +521,51 @@
     }
 
 //Scoring the Play
-    //!NEEDS TO CALCULATE GIVEN LETTERS OTHER PLAYERS PLACED PREVIOUSLY (ALL WORDS & LETTERS FORMED)
+    
     function scorePlay(){
         const wordsCreatedByPlay = getNewWordsCreatedByPlay()
         const scoreLetters = getNewWordsCreatedByPlay().flatMap(word => word.split(''))
         
         let playPoints = 0;
 
-        scoreLetters.forEach((letter) => {
-            
+        scoreLetters.forEach((letter) => {    
             if(letters[letter]){
                 playPoints += letters[letter].points;
             }
         })
 
+        if(turn === 1){player = players[0]}else{player = players[1]} 
+        if(placedLetters.length === 7){playPoints += 50} 
+
         return(playPoints)
+    }
+
+//Check Win & Assign Winner
+
+    function checkWin(){
+        if(letterBag.length !== 0){return} //guard: no winning unless no letters left in the bag
+        if(turn === 1){const player = players[0]}else{const player = players[1]}
+        if(player.letters.length !== 0){return} //guard: no winning unless someone is out of letters
+
+        const finalPlayer = player //assign winner variable
+        const otherPlayer = turn === 1 ? players[1] : players[0]
+        if(turn === 1){const otherPlayer = players[1]}else{const otherPlayer = players[0]} //final score adjustments
+        const otherPlayerLetters = otherPlayer.letters
+        let winPoints = 0;
+        otherPlayerLetters.forEach((letter) => {    
+            if(letters[letter]){
+                winPoints += letters[letter].points;
+            }
+        })
+        
+        finalPlayer.score += winPoints //Add letter points from other player to the score of the player who ran out of letters
+        otherPlayer.score -= winPoints  //Deduct any letters left in trays from other player's score
+        
+        if(finalPlayer.score === otherPlayer.score){winner = 'T'}else{
+            winner = finalPlayer.score > otherPlayer.score ? finalPlayer : otherPlayer
+        }
+        
+        console.log(winner)
     }
 
 //Other Functions (often useful in more than one of the above)
@@ -599,6 +656,7 @@
             round += 1
         }
 
+        render()
         // console.log(turn, round, players, board)
     } 
 
