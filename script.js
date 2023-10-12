@@ -242,6 +242,18 @@
         document.getElementById('number-of-letters-left-in-bag').innerText = numLettersInLetterBag
     }
 
+    function renderCheckPlayMessage(){
+        const checkFirstPlayMessage = checkFirstPlay() ? '' : 'Your word must be played horizontally and cover the center square of the board.'
+        const checkStraightPlayMessage = checkStraightPlay() ? '' : 'Your word must be played horizontally or vertically (in only one row or one column of the board).'
+        const checkPlayConnectedMessage = checkPlayConnected() ? '' : 'Your word must be connected to at least one letter that was played during a previous turn.'
+
+        const checkPlayMessage = checkFirstPlayMessage+' '+checkStraightPlayMessage+' '+checkPlayConnectedMessage
+
+        messageContainer.innerText = checkPlayMessage
+
+
+    }
+
     function renderWinMessage(){
         //Hide everything that appears under the board during gameplay
         letterTray.style.visibility = winner ? 'hidden':'visible' 
@@ -437,8 +449,8 @@
 
             if(turn === 1){player = players[0]}else{player = players[1]}
             player.letters = [...player.letters, ...placedLetters.map((element) => element.letter)] //return placed letter to player's tray
-
-            endTurnUpdates()
+            renderCheckPlayMessage()
+            setTimeout(endTurnUpdates, 5000)
             return  
         }
         
@@ -460,7 +472,6 @@
         
         const result = checkFirstPlayResult && checkStraightPlayResult && checkPlayConnectedResult && checkValidWordsResult
 
-        // console.log(checkFirstPlayResult, checkStraightPlayResult, checkPlayConnectedResult)
         return(result)
     }
 
@@ -771,7 +782,7 @@
     }
 
     function endTurnUpdates(){
-        
+        messageContainer.innerText = ''
         refillLettersButtonClicked = false //reset refillLettersButoonClicked
         exchangingLetters = false
         initiateLetterExchangeButton.style.visibility = 'visible'
@@ -787,6 +798,12 @@
         render()
         // console.log(turn, round, players, board)
     } 
+
+    function delay(milliseconds) {
+        return new Promise(resolve => {
+          setTimeout(resolve, milliseconds);
+        });
+      }
 
 init()
 render()

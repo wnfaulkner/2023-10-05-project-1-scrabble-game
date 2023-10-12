@@ -1,13 +1,12 @@
 * {
   /* background-color: rgb(255, 253, 253); */
   /* box-sizing: border-box; */
-  /* border: 0.1vmin dashed grey; */
+  border: 0.1vmin dashed grey;
   }
 
 header {
   height: 8vmin;
   max-height: 60px;
-  
 }
 
 h1 {
@@ -154,6 +153,16 @@ h3 {
   max-width: 60px;
   height: 6vmin;
   max-height: 60px;
+}
+
+#message-container {
+  display: inline;
+  /* max-height: 50px; */
+  width: 70%;
+  font-size: clamp(10px, 4vmin, 20px);
+  color: rgb(151, 6, 6);
+  font-weight: bolder;
+  margin-bottom: 15px;
 }
 
 #buttons-container {
