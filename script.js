@@ -209,7 +209,6 @@
         submitPlayButton.style.visibility = !exchangingLetters && !winner && placedLetters.length > 0 ? 'visible':'hidden'
         passTurnButton.style.visibility = !exchangingLetters && !winner && player.letters.length !== 0 ? 'visible':'hidden'
         playAgainButton.style.visibility = !exchangingLetters && winner ? 'visible':'hidden'
-
     }
 
     function renderTurnIndicator(){
@@ -244,7 +243,6 @@
     }
 
     function renderWinMessage(){
-
         //Hide everything that appears under the board during gameplay
         letterTray.style.visibility = winner ? 'hidden':'visible' 
         buttonsContainer.style.visibility = winner ? 'hidden':'visible'
