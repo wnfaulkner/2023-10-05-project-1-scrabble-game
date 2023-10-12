@@ -108,6 +108,7 @@
     )
     document.getElementById('letter-tray').addEventListener('click',selectLetter)
     document.getElementById('board-container').addEventListener('click',placeLetter)
+    
     document.getElementById('pass-turn-button').addEventListener('click', endTurnUpdates)
     submitPlayButton.addEventListener('click', submitPlay)
     playAgainButton.addEventListener('click', init)
@@ -174,14 +175,26 @@
             function(colArr, rowIdx){
                 colArr.forEach(
                     function(cellValue, colIdx){
+
+                        //Create the new board html div & add classes to style it
                         const cell = document.createElement('div')
                         cell.classList.add('board-cell')
                         cell.id = `${colIdx}_${rowIdx}`
-                        if(cell.id === 'cell-77'){cell.style.backgroundColor = '#dba4aa'}
                         
                         if(board[colIdx][rowIdx] !== ''){//render a letter in the square when present in the board array
                             cell.innerText = board[colIdx][rowIdx]
                             cell.classList.add('board-cell-with-letter')
+                        }
+
+                        if(placedLetters.length > 0){ //check if cell has a letter placed during the turn; if so, add it to special class and add an event listener so that it can be removed from the board 
+                            const placedLettersCoords = placedLetters.map((letter) => [letter.colIdx, letter.rowIdx])
+                            cellIsPlacedLetter = placedLettersCoords.some((coords) => coords[0] === colIdx && coords[1] === rowIdx);
+                            // const placedLettersRowIndices = placeLetters.map((letter) => letters.rowIdx)
+
+                            if(cellIsPlacedLetter){
+                                cell.classList.add('board-cell-with-placed-letter')
+                                cell.addEventListener('dblclick', removeLetterFromBoard)        
+                            }  
                         }
 
                         boardContainer.appendChild(cell)
@@ -225,7 +238,7 @@
             function(letter){
                 const letterTile = document.createElement('div')
                 letterTile.innerText = letter
-                letterTile.classList.add('current-player-letter')
+                letterTile.classList.add('letter-in-tray')
                 letterTray.appendChild(letterTile)
             }    
         )
@@ -278,7 +291,7 @@
         if(placedLetters.length === 0){boardAsOfEndOfLastTurn = JSON.parse(JSON.stringify(board))} //store initial state of board as of end of last turn so can revert to it if player makes an invalid play
 
         if(turn === 1){player = players[0]}else{player = players[1]} 
-        const currentLetterEls = document.getElementsByClassName('current-player-letter')
+        const currentLetterEls = document.getElementsByClassName('letter-in-tray')
         
         const currentLetterElsArray = [...currentLetterEls]
         const letterIdx = currentLetterElsArray.indexOf(event.target)
@@ -297,6 +310,8 @@
         if(!boardCellEl.classList.contains('board-cell')) {return} // guard: if the clicked element is not a valid board cell
         if(boardCellEl.classList.contains('board-cell-with-letter')){return} //guard: can't place a letter on top of a letter
         
+        
+
         const boardCellColIdx = parseInt(boardCellEl.id.split("_")[0])
         const boardCellRowIdx = parseInt(boardCellEl.id.split("_")[1])
 
@@ -312,8 +327,32 @@
         //CLEANUP
         const indexToRemove = player.letters.indexOf(selectedLetters[0])
         player.letters.splice(indexToRemove, 1) //remove the letter from the player's current letters
-        renderLettersInTray() //re-render the tray with the letter that was placed now gone
+        render() //re-render the tray with the letter that was placed now gone
         selectedLetters = [] //reset selectedLetters so placeLetter can be called again
+    }
+
+    function removeLetterFromBoard(event){
+        const boardCellEl = event.target
+        // if(!boardCellEl.classList.contains('board-cell-with-placed-letter')){return} // guard: shouldn't be necessary because event listener for double-click is only on placed letter cells
+
+        const boardCellColIdx = parseInt(boardCellEl.id.split("_")[0])
+        const boardCellRowIdx = parseInt(boardCellEl.id.split("_")[1])
+        if(turn === 1){player = players[0]}else{player = players[1]}
+        
+        player.letters = [...player.letters, board[boardCellColIdx][boardCellRowIdx]]  //return placed letter to player's tray
+        placedLetters = placedLetters.filter((letterObj) => !(letterObj.colIdx === boardCellColIdx && letterObj.rowIdx === boardCellRowIdx)) //remove letter from placedLetters
+
+        board[boardCellColIdx][boardCellRowIdx] = '' //modify 'board' object in the background 
+        
+        //cleanup
+        boardCellEl.removeEventListener('click', removeLetterFromBoard)//remove event listener from cell
+        boardCellEl.classList.remove('board-cell-with-placed-letter') //remove board-cell-with-letter class from cell
+       
+        renderBoard() //render updated board
+        renderLettersInTray() //render updated letters tray
+            
+        
+        console.log('click!')
     }
 
     function submitPlay(){
@@ -350,7 +389,7 @@
         
         const result = checkFirstPlayResult && checkStraightPlayResult && checkPlayConnectedResult && checkValidWordsResult
 
-        console.log(checkFirstPlayResult, checkStraightPlayResult, checkPlayConnectedResult)
+        // console.log(checkFirstPlayResult, checkStraightPlayResult, checkPlayConnectedResult)
         return(result)
     }
 

@@ -1,7 +1,7 @@
 * {
     /* background-color: rgb(255, 253, 253); */
     /* box-sizing: border-box; */
-    border: 0.1vmin dashed grey;
+    /* border: 0.1vmin dashed grey; */
   }
   
 body {
@@ -94,6 +94,10 @@ h1 {
   align-items: center;
   background:rgb(46, 46, 46) !important;
   color:#f7f7f7;
+}
+
+.board-cell-with-placed-letter {
+  background:rgb(66, 7, 7) !important;
 }
 
 #board-container div:hover {
