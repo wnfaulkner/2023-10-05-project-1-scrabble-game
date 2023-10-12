@@ -70,35 +70,29 @@
         {name: 'Two', turn: 2, score: 0, letters: []}
     ]
     let letterBag;
-
-    // Expand letters object into an array containing the actual letter tiles
-    function createLetterBag(){
-        letterBag = [];
-
-        for (const letter in letters) {
-            const letterData = letters[letter];
-            const { count } = letterData; // Extract the 'count' property
-            
-            for (let i = 0; i < count; i++) { // Push the letter into the array 'count' number of times
-                letterBag.push(letter);
-            }
-        }
-    }
     
     
 /*----- cached elements  -----*/
 
+    const playerScores = document.querySelectorAll('#player-scores > h3')
+    const boardContainer = document.getElementById('board-container')
+    const letterTray = document.getElementById('letter-tray')
+    const messageContainer = document.getElementById('message-container')
+    const buttonsContainer = document.getElementById('buttons-container')
+
     const refillLettersButton = document.getElementById('select-letters-button')
+    const initiateLetterExchangeButton = document.getElementById('initiate-letter-exchange-button')
     const submitPlayButton = document.getElementById('submit-play-button')
     const passTurnButton = document.getElementById('pass-turn-button')
     const playAgainButton = document.getElementById('play-again-button')
-    
-    const boardContainer = document.getElementById('board-container')
-    const playerScores = document.querySelectorAll('#player-scores > h3')
-    const letterTray = document.getElementById('letter-tray')
 
+    const lettersLeftIndicator = document.getElementById('letters-left-indicator')
+    
 /*----- event listeners -----*/
 
+    letterTray.addEventListener('click',selectLetter)
+    boardContainer.addEventListener('click',placeLetter)
+    
     refillLettersButton.addEventListener('click', 
         function(){
             refillLettersFromBag()
@@ -106,11 +100,9 @@
             renderControls()
         }
     )
-    document.getElementById('letter-tray').addEventListener('click',selectLetter)
-    document.getElementById('board-container').addEventListener('click',placeLetter)
-    
-    document.getElementById('pass-turn-button').addEventListener('click', endTurnUpdates)
+    initiateLetterExchangeButton.addEventListener('click', initiateLetterExchange)
     submitPlayButton.addEventListener('click', submitPlay)
+    passTurnButton.addEventListener('click', endTurnUpdates)
     playAgainButton.addEventListener('click', init)
 
 
@@ -211,10 +203,12 @@
     }
 
     function renderControls(){
-        refillLettersButton.style.visibility = !refillLettersButtonClicked && letterBag.length !== 0 ? 'visible':'hidden'
-        submitPlayButton.style.visibility = !winner && !exchangingLetters ? 'visible':'hidden'
-        passTurnButton.style.visibility = letterBag.length === 0 && !winner ? 'visible':'hidden'
-        playAgainButton.style.visibility = winner ? 'visible':'hidden'
+        if(turn === 1){player = players[0]}else{player = players[1]}
+        refillLettersButton.style.visibility = !exchangingLetters && !refillLettersButtonClicked && letterBag.length !== 0 ? 'visible':'hidden'
+        initiateLetterExchangeButton.style.visibility = !exchangingLetters && !winner && player.letters.length !== 0 ? 'visible':'hidden'
+        submitPlayButton.style.visibility = !exchangingLetters && !winner && placedLetters.length > 0 ? 'visible':'hidden'
+        passTurnButton.style.visibility = !exchangingLetters && !winner && player.letters.length !== 0 ? 'visible':'hidden'
+        playAgainButton.style.visibility = !exchangingLetters && winner ? 'visible':'hidden'
 
     }
 
@@ -250,10 +244,15 @@
     }
 
     function renderWinMessage(){
-        letterTray.style.visibility = winner ? 'hidden':'visible'
-        document.getElementById('letters-left-indicator').style.visibility = !winner ? 'visible':'hidden' //hide letter bag indicator
-        document.getElementById('win-message').style.visibility = winner ? 'visible':'hidden' //show a winning message
-        document.getElementById('win-message').innerHTML = winner ? `Player ${winner.name} Wins!` : ''
+
+        //Hide everything that appears under the board during gameplay
+        letterTray.style.visibility = winner ? 'hidden':'visible' 
+        buttonsContainer.style.visibility = winner ? 'hidden':'visible'
+        lettersLeftIndicator.style.visibility = !winner ? 'visible':'hidden' 
+
+        //Display win message
+        //messageContainer.style.visibility = winner ? 'visible':'hidden' //show a winning message
+        messageContainer.innerHTML = winner ? `Player ${winner.name} Wins!` : ''
     }
 
 //User Interactions
@@ -290,7 +289,7 @@
         if(!exchangingLetters && selectedLetters.length > 0){return} //guard: when not exchanging letters, should not be able to select more than one letter
         if(placedLetters.length === 0){boardAsOfEndOfLastTurn = JSON.parse(JSON.stringify(board))} //store initial state of board as of end of last turn so can revert to it if player makes an invalid play
 
-        if(turn === 1){player = players[0]}else{player = players[1]} 
+        
         const currentLetterEls = document.getElementsByClassName('letter-in-tray')
         
         const currentLetterElsArray = [...currentLetterEls]
@@ -299,9 +298,12 @@
         const selectedLetterEl = currentLetterEls[letterIdx] //update letter tray formatting to show that letter has been selected
         selectedLetterEl.style.backgroundColor = '#636363'
 
+        if(turn === 1){player = players[0]}else{player = players[1]} 
         const selectedLetter = player.letters[letterIdx] //return actual letter as js object
         selectedLetters.push(selectedLetter)
     }
+
+
 
     function placeLetter(event){
         if(selectedLetters.length !== 1){return} //guard: cancel operation if have no or multiple selected letters
@@ -310,8 +312,6 @@
         if(!boardCellEl.classList.contains('board-cell')) {return} // guard: if the clicked element is not a valid board cell
         if(boardCellEl.classList.contains('board-cell-with-letter')){return} //guard: can't place a letter on top of a letter
         
-        
-
         const boardCellColIdx = parseInt(boardCellEl.id.split("_")[0])
         const boardCellRowIdx = parseInt(boardCellEl.id.split("_")[1])
 
@@ -355,6 +355,78 @@
         console.log('click!')
     }
 
+    function initiateLetterExchange(event){
+        if(turn === 1){player = players[0]}else{player = players[1]}
+        if(player.letters.length === 0){exchangingLetters = false; return} //guard: if player has no letters to exchange
+        
+        exchangingLetters = true
+
+        if(placedLetters.length > 0){ //remove any placed letters from the board & put them back in the player's tray
+            board = boardAsOfEndOfLastTurn //remove placed letters from board
+
+           
+            player.letters = [...player.letters, ...placedLetters.map((element) => element.letter)] //return placed letter to player's tray
+
+            document.querySelectorAll('.board-cell-with-placed-letter').forEach((cell) => cell.classList.remove('board-cell-with-placed-letter'))
+        }
+
+        //swap out Exchange Letters button for a new one same styling as botton:hover
+        const completeLetterExchangeButton = document.createElement('button')
+        completeLetterExchangeButton.innerText = 'Complete Letter Exchange'
+        completeLetterExchangeButton.id = 'complete-letter-exchange-button'
+        completeLetterExchangeButton.addEventListener('click', completeLetterExchange)
+        buttonsContainer.insertBefore(completeLetterExchangeButton, submitPlayButton)
+
+        //!display instructions
+        
+        
+        render()
+        console.log('initiating letter exchange!')
+    }
+
+    function completeLetterExchange(event){
+        const completeLetterExchangeButton = document.getElementById('complete-letter-exchange-button')
+        if(selectedLetters.length === 0){ //guard: if no selected letters to exchange, set conditions erxchangingLetters condition back to false and end function execution
+            exchangingLetters = false 
+            completeLetterExchangeButton.remove()
+            render()
+            return
+        } 
+
+        //Remove letters at random from bag - newLettersFromExchange
+        let numLettersToRefill = selectedLetters.length //number of letters to be added to the player's tray
+        if(numLettersToRefill > letterBag.length){ //guard: for when players get down to only having less than seven letters left in the bag
+            messageContainer.innerHTML = `Only ${letterBag.length} letter(s) left in the bag. Please try again and select fewer letters.`
+            exchangingLetters = false; 
+            completeLetterExchangeButton.remove(); 
+            render(); 
+            return
+            //!maybe allow players to deselect letters?
+        } 
+    
+        const newLettersFromExchange = []
+        for(let i = 0; i < numLettersToRefill; i++){ newLettersFromExchange[i] = refillLetterFromBag() }
+        
+        //Remove selectedLetters from player.letters
+        if(turn === 1){player = players[0]}else{player = players[1]}
+        selectedLetters.forEach(function(selectedLetter){
+            const indexToRemove = player.letters.indexOf(selectedLetter)
+            player.letters.splice(indexToRemove, 1) //remove the letter from the player's current letters
+        })
+        
+        //Add selectedLetters to letterBag
+        letterBag = [...letterBag, ...selectedLetters].sort()
+        
+        //Add newLettersFromExchange to player.letters
+        player.letters = [...player.letters, ...newLettersFromExchange] //refill the player's letter tray
+
+        //Cleanup
+        completeLetterExchangeButton.remove()
+        endTurnUpdates()
+        render()
+        console.log('letter exchange done!', players.map(elem => elem.letters))
+    }
+
     function submitPlay(){
         if(placedLetters.length === 0 && !exchangingLetters){return} //guard: if the player has not placed any letters and is not doing a letter exchange, don't do anything
 
@@ -375,8 +447,7 @@
         player.score += scorePlay()
         
         checkWin()
-        endTurnUpdates()
-        
+        endTurnUpdates()  
     }
 
 //Checking the Validity of the Play
@@ -609,6 +680,20 @@
 
 //Other Functions (often useful in more than one of the above)
 
+    // Expand letters object into an array containing the actual letter tiles
+    function createLetterBag(){
+        letterBag = [];
+
+        for (const letter in letters) {
+            const letterData = letters[letter];
+            const { count } = letterData; // Extract the 'count' property
+            
+            for (let i = 0; i < count; i++) { // Push the letter into the array 'count' number of times
+                letterBag.push(letter);
+            }
+        }
+    }
+
     function getAdjacentCells(grid, col, row, direction) {
         if(col > 14 || row > 14){return}
 
@@ -684,8 +769,10 @@
     }
 
     function endTurnUpdates(){
-       
+        
         refillLettersButtonClicked = false //reset refillLettersButoonClicked
+        exchangingLetters = false
+        initiateLetterExchangeButton.style.visibility = 'visible'
         selectedLetters = [] // reset selectedLetters
         placedLetters = [] // reset placedLetters
         if(turn === 1){ // update turn and round

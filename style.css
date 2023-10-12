@@ -1,19 +1,19 @@
 * {
-    /* background-color: rgb(255, 253, 253); */
-    /* box-sizing: border-box; */
-    /* border: 0.1vmin dashed grey; */
+  /* background-color: rgb(255, 253, 253); */
+  /* box-sizing: border-box; */
+  /* border: 0.1vmin dashed grey; */
   }
   
 body {
-    /* viewport units: vh (viewport height), vw, vmin (smallest between vh & vw)*/
-    height: 100vh;
-    margin: 0;
-    font-family: 'Montserrat', sans-serif;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+  /* viewport units: vh (viewport height), vw, vmin (smallest between vh & vw)*/
+  height: 100vh;
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 .hidden{
@@ -21,9 +21,9 @@ body {
 }
 
 h1 {
-    font-size: 6vmin;
-    font-weight: bolder;
-    color: rgb(139, 22, 22);
+  font-size: 6vmin;
+  font-weight: bolder;
+  color: rgb(139, 22, 22);
 }
 
 #scoreboard {
@@ -133,6 +133,8 @@ h1 {
 
 button {
   margin-top: 4vmin;
+  margin-left: 4px;
+  margin-right: 4px;
   padding: 2vmin;
   font-size: 2vmin;
   border-radius: 4vmin;
@@ -140,9 +142,14 @@ button {
   color: rgb(46, 46, 46);
 }
 
+#complete-letter-exchange-button {
+  color: rgb(228, 228, 228);
+  background-color: darkslategray;
+}
+
 button:hover {
-    color: rgb(228, 228, 228);
-    background-color: darkslategray;
+  color: rgb(228, 228, 228);
+  background-color: darkslategray;
 }
 
 #letters-left-indicator {
