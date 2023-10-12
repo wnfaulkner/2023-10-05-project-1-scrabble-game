@@ -3,10 +3,26 @@
   /* box-sizing: border-box; */
   /* border: 0.1vmin dashed grey; */
   }
+
+header {
+  height: 8vmin;
+  max-height: 60px;
+  
+}
+
+h1 {
+  display:inline;
+  max-height: 50px;
+  font-size: clamp(30px, 6vmin, 50px);
+  font-weight: bolder;
+  color: rgb(139, 22, 22);
+}
   
 body {
   /* viewport units: vh (viewport height), vw, vmin (smallest between vh & vw)*/
-  height: 100vh;
+  width: 100vmin;
+  max-width: 700px;
+  /* max-height: 500px; */
   margin: 0;
   font-family: 'Montserrat', sans-serif;
   display: flex;
@@ -16,19 +32,17 @@ body {
   text-align: center;
 }
 
-.hidden{
-  visibility: hidden;
+h3 {
+  font-size: clamp(15px, 5vmin, 25px);
+  /* font-weight: bolder; */
+  /* color: rgb(139, 22, 22); */
 }
 
-h1 {
-  font-size: 6vmin;
-  font-weight: bolder;
-  color: rgb(139, 22, 22);
-}
 
 #scoreboard {
   /* background-color: aqua; */
   width: 90%;
+  max-height: 200px;
 }
 
 #scoreboard-headers {
@@ -39,11 +53,19 @@ h1 {
   /* margin-top: -3vmin; */
 }
 
+#player-scores{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  margin-top: -20px;
+  font-size: 4vmin;
+}
+
 #turn-indicator {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   justify-items: center;
-  font-size: 3vmin;
+  font-size: clamp(20px, 3vmin, 25px);
   /* margin-top: -3vmin; */
   margin-bottom: 4vmin;
 }
@@ -63,23 +85,24 @@ h1 {
   border-bottom: 3vmin solid rgb(139, 22, 22);
 }
 
-#player-scores{
-  display: flex;
-  flex-direction: row;
-  justify-content: space-around;
-  margin-top: -20px;
-  font-size: 4vmin;
-}
+/* #board-container {
+  justify-self: center;
+  width: 90vw;
+  margin: 10px 10px;
+} */
 
-#board-container {
+#grid-container {
+  /* position: absolute; */
+  /* max-height: 500px; */
   display: grid;
-  grid-template-columns: repeat(15, 6vmin);
-  grid-template-rows: repeat(15, 6vmin);
-  /* gap: 1vmin; */
-  margin-top: -0.5vmin;
+  grid-template-columns: repeat(15, minmax(10px, 40px));
+  grid-template-rows: repeat(15, minmax(10px, 40px));
+  margin: 0px 25px 0px 25px;
 }
   
-#board-container > div {
+.board-cell {
+  font-size: clamp(15px, 3vmin, 20px);
+  font-weight: bolder;
   background: rgb(248, 235, 218);
   border: 0.1vmin solid rgb(165, 165, 165);
 }
@@ -109,8 +132,11 @@ h1 {
   justify-content: space-around;
   align-items: center;
   background-color: #a3a3a3;
-  width: 80vmin; 
+  
+  width: 80vmin;
+  max-width: 500px; 
   height: 10vmin; 
+  max-height: 80px;
   margin: 3vmin 0vmin;
 }
 
@@ -118,28 +144,36 @@ h1 {
   display: flex;
   justify-content: center;
   align-items: center;
+  
+  font-size: clamp(15px, 3vmin, 20px);
+  font-weight: bolder;
   background:rgb(46, 46, 46);
   color:#f7f7f7;
+  
   width: 6vmin;
+  max-width: 60px;
   height: 6vmin;
+  max-height: 60px;
 }
 
 #buttons-container {
   width: 90%;
+  max-width: 600px;
+  height: 50px; 
   display: flex;
   justify-content: space-around;
-  align-items: center;
+  align-items: flex-start;
 }
 
 button {
-  margin-top: 4vmin;
-  margin-left: 4px;
-  margin-right: 4px;
-  padding: 2vmin;
-  font-size: 2vmin;
-  border-radius: 4vmin;
-  border: 0.1vmin solid grey;
-  color: rgb(46, 46, 46);
+  max-height: 50px; 
+  margin-top: 0; /* Remove margin-top */
+  margin-bottom: auto; /* Automatically push the buttons to the top */
+  padding: 10px; Set padding for buttons
+  font-size: clamp(12px, 2vmin, 18px); /* Fix the font size function syntax */
+  border-radius: 4px; /* Set border-radius */
+  border: 1px solid grey; /* Add a border to buttons */
+  color: rgb(46, 46, 46); /* Set button text color */
 }
 
 #complete-letter-exchange-button {
@@ -153,9 +187,19 @@ button:hover {
 }
 
 #letters-left-indicator {
-  width: 80%;
+  width: 60%;
+  font-size: clamp(15px, 3vmin, 20px);
   display: flex;
   justify-content: space-around;
   align-items: center;
+}
 
+#instructions {
+  text-align: left;
+  font-size: 15px;
+  max-width: 80%;
+}
+
+.hidden{
+  visibility: hidden;
 }

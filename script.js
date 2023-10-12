@@ -75,7 +75,7 @@
 /*----- cached elements  -----*/
 
     const playerScores = document.querySelectorAll('#player-scores > h3')
-    const boardContainer = document.getElementById('board-container')
+    const gridContainer = document.getElementById('grid-container')
     const letterTray = document.getElementById('letter-tray')
     const messageContainer = document.getElementById('message-container')
     const buttonsContainer = document.getElementById('buttons-container')
@@ -91,7 +91,7 @@
 /*----- event listeners -----*/
 
     letterTray.addEventListener('click',selectLetter)
-    boardContainer.addEventListener('click',placeLetter)
+    gridContainer.addEventListener('click',placeLetter)
     
     refillLettersButton.addEventListener('click', 
         function(){
@@ -151,7 +151,7 @@
 //Visualize all state in the DOM
 
     function render(){
-        renderWinMessage()
+        // renderWinMessage()
         renderScores()
         renderTurnIndicator()
         renderBoard()
@@ -161,7 +161,7 @@
     }
     
     function renderBoard(){
-        boardContainer.innerHTML = ''
+        gridContainer.innerHTML = ''
 
         board.forEach(
             function(colArr, rowIdx){
@@ -189,7 +189,7 @@
                             }  
                         }
 
-                        boardContainer.appendChild(cell)
+                        gridContainer.appendChild(cell)
                     }
                 )	
             }
@@ -249,8 +249,12 @@
         lettersLeftIndicator.style.visibility = !winner ? 'visible':'hidden' 
 
         //Display win message
-        //messageContainer.style.visibility = winner ? 'visible':'hidden' //show a winning message
-        messageContainer.innerHTML = winner ? `Player ${winner.name} Wins!` : ''
+        messageContainer.style.visibility = 'visible' //show a winning message
+        if(winner === 'T'){
+            messageContainer.innerHTML = 'Tie Game!'
+        }else{
+            messageContainer.innerHTML = `Player ${winner.name} Wins!`
+        }
     }
 
 //User Interactions
@@ -300,8 +304,6 @@
         const selectedLetter = player.letters[letterIdx] //return actual letter as js object
         selectedLetters.push(selectedLetter)
     }
-
-
 
     function placeLetter(event){
         if(selectedLetters.length !== 1){return} //guard: cancel operation if have no or multiple selected letters
@@ -672,8 +674,10 @@
         if(finalPlayer.score === otherPlayer.score){winner = 'T'}else{
             winner = finalPlayer.score > otherPlayer.score ? finalPlayer : otherPlayer
         }
+
+        renderWinMessage()
         
-        console.log(winner)
+        //console.log(winner)
     }
 
 //Other Functions (often useful in more than one of the above)
