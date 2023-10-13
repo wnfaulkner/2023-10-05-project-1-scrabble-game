@@ -28,8 +28,6 @@
         X: {count: 1, points: 8},
         Y: {count: 2, points: 4},
         Z: {count: 1, points: 10},
-        // Blank tile (used as a wildcard)
-        //_: {count: 2, points: 0},
     };
 
     const blankBoard = [
@@ -102,7 +100,6 @@
     passTurnButton.addEventListener('click', endTurnUpdates)
     playAgainButton.addEventListener('click', init)
 
-
 /*----- functions -----*/
 
 //Initialize all state, then call render()
@@ -126,7 +123,7 @@
             ['','','','','','','','','','','','','','',''],
             ['','','','','','','','','','','','','','','']		
         ]
-
+        boardAsOfEndOfLastTurn = blankBoard
         turn = 1
         round = 1
         winner = null
@@ -140,8 +137,12 @@
         refillLettersButtonClicked = false
         exchangingLetters = false
 
-        createLetterBag()
+        letterTray.style.visibility = winner ? 'hidden':'visible' 
+        buttonsContainer.style.visibility = winner ? 'hidden':'visible'
+        lettersLeftIndicator.style.visibility = winner ? 'hidden':'visible'
+        messageContainer.innerHTML = ''
 
+        createLetterBag()
         render()
     }
 
@@ -237,9 +238,11 @@
     }
 
     function renderCheckPlayMessage(){
-        const checkFirstPlayMessage = checkFirstPlay() ? '' : 'Your word must be played horizontally and cover the center square of the board.'
-        const checkStraightPlayMessage = checkStraightPlay() ? '' : 'Your word must be played horizontally or vertically (in only one row or one column of the board).'
-        const checkPlayConnectedMessage = checkPlayConnected() ? '' : 'Your word must be connected to at least one letter that was played during a previous turn.'
+        playOnBlankBoard = !hasNonBlankStrings(boardAsOfEndOfLastTurn)
+
+        const checkFirstPlayMessage = playOnBlankBoard && !checkFirstPlay() ? 'Your word must be played horizontally and cover the center square of the board.' : ''
+        const checkStraightPlayMessage = !checkStraightPlay() ? 'Your word must be played horizontally or vertically (in only one row or one column of the board).' : ''
+        const checkPlayConnectedMessage = !playOnBlankBoard && !checkPlayConnected() ? 'Your word must be connected to at least one letter that was played during a previous turn.' : ''
 
         const checkPlayMessage = checkFirstPlayMessage+' '+checkStraightPlayMessage+' '+checkPlayConnectedMessage
 
@@ -250,7 +253,7 @@
         //Hide everything that appears under the board during gameplay
         letterTray.style.visibility = winner ? 'hidden':'visible' 
         buttonsContainer.style.visibility = winner ? 'hidden':'visible'
-        lettersLeftIndicator.style.visibility = !winner ? 'visible':'hidden' 
+        lettersLeftIndicator.style.visibility = winner ? 'hidden':'visible' 
 
         //Display win message
         messageContainer.style.visibility = 'visible' //show a winning message
@@ -259,6 +262,7 @@
         }else{
             messageContainer.innerHTML = `Player ${winner.name} Wins!`
         }
+        
     }
 
 //User Interactions
@@ -293,7 +297,6 @@
 
     function selectLetter(event){
         if(!exchangingLetters && selectedLetters.length > 0){return} //guard: when not exchanging letters, should not be able to select more than one letter
-        if(placedLetters.length === 0){boardAsOfEndOfLastTurn = JSON.parse(JSON.stringify(board))} //store initial state of board as of end of last turn so can revert to it if player makes an invalid play
 
         const currentLetterEls = document.getElementsByClassName('letter-in-tray')
         const currentLetterElsArray = [...currentLetterEls]
@@ -422,8 +425,7 @@
         if(placedLetters.length === 0 && !exchangingLetters){return} //guard: if the player has not placed any letters and is not doing a letter exchange, don't do anything
 
         //1. Check if play is valid, and if not, return placed letters to player's tray and end turn with no change in score.
-        if(!checkPlay()){
-            
+        if(!checkPlay()){    
             board = boardAsOfEndOfLastTurn //Remove placed letters from board
 
             if(turn === 1){player = players[0]}else{player = players[1]}
@@ -444,9 +446,11 @@
 //Checking the Validity of the Play
     
     function checkPlay(){
-        const checkFirstPlayResult = checkFirstPlay() 
+        playOnBlankBoard = !hasNonBlankStrings(boardAsOfEndOfLastTurn)
+        
+        const checkFirstPlayResult = playOnBlankBoard ? checkFirstPlay() : true 
         const checkStraightPlayResult = checkStraightPlay()
-        const checkPlayConnectedResult = checkPlayConnected()
+        const checkPlayConnectedResult = playOnBlankBoard ? true : checkPlayConnected()
         
         const result = checkFirstPlayResult && checkStraightPlayResult && checkPlayConnectedResult
 
@@ -455,7 +459,7 @@
 
     //Checking Validity of Placement
     function checkFirstPlay(){
-        if(turn !== 1 || round !== 1){return(true)} //guard: if this is not the first play, return 'true' (these checks no longer applicable)
+        //if(turn !== 1 || round !== 1){return(true)} //guard: if this is not the first play, return 'true' (these checks no longer applicable)
         const cols = placedLetters.map((item) => item.colIdx)
         const rows = placedLetters.map((item) => item.rowIdx)
 
@@ -485,7 +489,7 @@
     }
 
     function checkPlayConnected(){
-        if(turn === 1 && round === 1){return(true)} //guard: if this is the first play, return 'true' (can't be connected on the first play)
+        //if(turn === 1 && round === 1){return(true)} //guard: if this is the first play, return 'true' (can't be connected on the first play)
         const result = placedLetters.map((item) => checkLetterConnectedToPreviouslyPlacedLetters(item)).some((element) => element === true)
         return(result)
     }
@@ -698,13 +702,20 @@
         return adjacentCells;
     }
 
+    function hasNonBlankStrings(arrayOfArrays) {
+        return arrayOfArrays.some(arr => {
+          return arr.some(str => str !== '');
+        });
+    }
+
     function endTurnUpdates(){
-        messageContainer.innerText = ''
+        messageContainer.innerText = winner ? messageContainer.innerText : ''
         refillLettersButtonClicked = false //reset refillLettersButoonClicked
         exchangingLetters = false
         initiateLetterExchangeButton.style.visibility = 'visible'
         selectedLetters = [] // reset selectedLetters
         placedLetters = [] // reset placedLetters
+        boardAsOfEndOfLastTurn = JSON.parse(JSON.stringify(board)) //store initial state of board as of end of last turn so can revert to it if player makes an invalid play
         if(turn === 1){ // update turn and round
             turn = 2
         }else{
@@ -714,12 +725,6 @@
 
         render()
     } 
-
-    function delay(milliseconds) {
-        return new Promise(resolve => {
-          setTimeout(resolve, milliseconds);
-        });
-      }
 
 init()
 render()
