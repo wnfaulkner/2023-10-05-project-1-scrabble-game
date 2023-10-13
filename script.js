@@ -49,9 +49,6 @@
         ['','','','','','','','','','','','','','',''],
         ['','','','','','','','','','','','','','','']		
     ]
-
-    //import wordList from './wordlist_json.json' assert { type: 'json' }
-
     
 /*----- state variables -----*/
 
@@ -111,7 +108,7 @@
 //Initialize all state, then call render()
 
     function init () {
-        //Rotate 90 degrees counter-clockwise and array is visualization of the board
+        
         board = [
             ['','','','','','','','','','','','','','',''],
             ['','','','','','','','','','','','','','',''],
@@ -151,7 +148,6 @@
 //Visualize all state in the DOM
 
     function render(){
-        // renderWinMessage()
         renderScores()
         renderTurnIndicator()
         renderBoard()
@@ -199,7 +195,6 @@
     function renderScores(){     
         playerScores[0].innerText = players[0]['score']
         playerScores[1].innerText = players[1]['score']
-        // ! REFACTOR TO AN ARRAY ITERATOR, PROBABLY FOREACH?
     }
 
     function renderControls(){
@@ -212,7 +207,6 @@
     }
 
     function renderTurnIndicator(){
-        let turnIndicatorEl;
         if(turn === 1){
             document.querySelector('#player-1-turn-indicator').classList.add('active-turn-indicator')
             document.querySelector('#player-2-turn-indicator').classList.remove('active-turn-indicator')
@@ -250,8 +244,6 @@
         const checkPlayMessage = checkFirstPlayMessage+' '+checkStraightPlayMessage+' '+checkPlayConnectedMessage
 
         messageContainer.innerText = checkPlayMessage
-
-
     }
 
     function renderWinMessage(){
@@ -303,12 +295,9 @@
         if(!exchangingLetters && selectedLetters.length > 0){return} //guard: when not exchanging letters, should not be able to select more than one letter
         if(placedLetters.length === 0){boardAsOfEndOfLastTurn = JSON.parse(JSON.stringify(board))} //store initial state of board as of end of last turn so can revert to it if player makes an invalid play
 
-        
         const currentLetterEls = document.getElementsByClassName('letter-in-tray')
-        
         const currentLetterElsArray = [...currentLetterEls]
         const letterIdx = currentLetterElsArray.indexOf(event.target)
-        
         const selectedLetterEl = currentLetterEls[letterIdx] //update letter tray formatting to show that letter has been selected
         selectedLetterEl.style.backgroundColor = '#636363'
 
@@ -345,8 +334,6 @@
 
     function removeLetterFromBoard(event){
         const boardCellEl = event.target
-        // if(!boardCellEl.classList.contains('board-cell-with-placed-letter')){return} // guard: shouldn't be necessary because event listener for double-click is only on placed letter cells
-
         const boardCellColIdx = parseInt(boardCellEl.id.split("_")[0])
         const boardCellRowIdx = parseInt(boardCellEl.id.split("_")[1])
         if(turn === 1){player = players[0]}else{player = players[1]}
@@ -356,15 +343,12 @@
 
         board[boardCellColIdx][boardCellRowIdx] = '' //modify 'board' object in the background 
         
-        //cleanup
+        //Cleanup
         boardCellEl.removeEventListener('click', removeLetterFromBoard)//remove event listener from cell
         boardCellEl.classList.remove('board-cell-with-placed-letter') //remove board-cell-with-letter class from cell
        
         renderBoard() //render updated board
         renderLettersInTray() //render updated letters tray
-            
-        
-        console.log('click!')
     }
 
     function initiateLetterExchange(event){
@@ -382,18 +366,14 @@
             document.querySelectorAll('.board-cell-with-placed-letter').forEach((cell) => cell.classList.remove('board-cell-with-placed-letter'))
         }
 
-        //swap out Exchange Letters button for a new one same styling as botton:hover
+        //Swap out Exchange Letters button for a new one same styling as botton:hover for completing the exchange
         const completeLetterExchangeButton = document.createElement('button')
         completeLetterExchangeButton.innerText = 'Complete Letter Exchange'
         completeLetterExchangeButton.id = 'complete-letter-exchange-button'
         completeLetterExchangeButton.addEventListener('click', completeLetterExchange)
-        buttonsContainer.insertBefore(completeLetterExchangeButton, submitPlayButton)
-
-        //!display instructions
-        
+        buttonsContainer.insertBefore(completeLetterExchangeButton, submitPlayButton)   
         
         render()
-        console.log('initiating letter exchange!')
     }
 
     function completeLetterExchange(event){
@@ -413,7 +393,6 @@
             completeLetterExchangeButton.remove(); 
             render(); 
             return
-            //!maybe allow players to deselect letters?
         } 
     
         const newLettersFromExchange = []
@@ -476,7 +455,6 @@
     }
 
     //Checking Validity of Placement
-    //! NEED TO ACCOUNT FOR STATE: FIRST PLAYER SUBMITS INVALID PLAY SO SECOND PLAYER'S TURN NEEDS TO GET CHECKED WITH CHECKFIRSTPLAY
     function checkFirstPlay(){
         if(turn !== 1 || round !== 1){return(true)} //guard: if this is not the first play, return 'true' (these checks no longer applicable)
         const cols = placedLetters.map((item) => item.colIdx)
@@ -520,16 +498,7 @@
         return(result)
     }
 
-    //!Need to account for situation where letters are all placed in the same column/row, and some next to previously placed letters, but at least one is separated off from the other placed letters (island letters), even if it is next to a differnt previously placed letter
-    // function checkLetterConnectedToPlay(placedLetter){
-    //     const adjacentCells = getAdjacentCells(boardAsOfEndOfLastTurn, placedLetter.colIdx, placedLetter.rowIdx)
-    //     const result = adjacentCells.map((item) => item.contents !== '').some((element) => element === true)
-    //     // console.log(result)
-    //     return(result)
-    // }
-
     //Checking Validity of New Words Created by the Play
-
     function checkValidWords(){
         const wordsCreatedByPlay = getNewWordsCreatedByPlay()
 
@@ -571,6 +540,9 @@
         //   });
     }
 
+ 
+
+//Scoring the Play
     function getNewWordsCreatedByPlay(){
         const newHorizontalWords = [...new Set(placedLetters.map(item => getHorizontalWord(item)))]
         const newVerticalWords = [...new Set(placedLetters.map(item => getVerticalWord(item)))]
@@ -589,7 +561,7 @@
         //turn !== 1 && round !== 1 && 
         const wordBoardCells = wordRange.map(item => [item, rowIdx])
         const word = wordBoardCells.map(item => board[item[0]][item[1]]).join('')
- 
+
         return(word)
     }
 
@@ -640,8 +612,6 @@
         const result = {colIdx, rowIdx}
         return(result)
     }
-
-//Scoring the Play
     
     function scorePlay(){
         const wordsCreatedByPlay = getNewWordsCreatedByPlay()

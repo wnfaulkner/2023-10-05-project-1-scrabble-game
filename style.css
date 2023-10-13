@@ -1,9 +1,3 @@
-* {
-    /* background-color: rgb(255, 253, 253); */
-    /* box-sizing: border-box; */
-    /* border: 0.1vmin dashed grey; */
-  }
-
 header {
   height: 8vmin;
   max-height: 60px;
@@ -13,18 +7,14 @@ header {
 h1 {
   display:inline;
   max-height: 50px;
-  
-
   font-size: clamp(30px, 6vmin, 50px);
   font-weight: bolder;
   color: rgb(139, 22, 22);
 }
   
 body {
-  /* viewport units: vh (viewport height), vw, vmin (smallest between vh & vw)*/
   width: 100vmin;
   max-width: 700px;
-  /* max-height: 500px; */
   margin: 0;
   font-family: 'Montserrat', sans-serif;
   display: flex;
@@ -36,13 +26,10 @@ body {
 
 h3 {
   font-size: clamp(15px, 5vmin, 25px);
-  /* font-weight: bolder; */
-  /* color: rgb(139, 22, 22); */
 }
 
 
 #scoreboard {
-  /* background-color: aqua; */
   width: 90%;
   max-height: 200px;
 }
@@ -52,7 +39,6 @@ h3 {
   flex-direction: row;
   justify-content: space-around;
   font-size: 3vmin;
-  /* margin-top: -3vmin; */
 }
 
 #player-scores{
@@ -68,34 +54,22 @@ h3 {
   grid-template-columns: repeat(3, 1fr);
   justify-items: center;
   font-size: clamp(20px, 3vmin, 25px);
-  /* margin-top: -3vmin; */
   margin-bottom: 4vmin;
 }
 
 .turn-indicator  {
-  /* display: flex; */
-  /* justify-content: flex-end; */
   width: 0;
   height: 0;
   border-left: 3vmin solid transparent;
   border-right: 3vmin solid transparent;
   border-bottom: 3vmin solid transparent;
-  /* border-width: 5px; */
 }
 
 .active-turn-indicator {
   border-bottom: 3vmin solid rgb(139, 22, 22);
 }
 
-/* #board-container {
-  justify-self: center;
-  width: 90vw;
-  margin: 10px 10px;
-} */
-
 #grid-container {
-  /* position: absolute; */
-  /* max-height: 500px; */
   display: grid;
   grid-template-columns: repeat(15, minmax(10px, 40px));
   grid-template-rows: repeat(15, minmax(10px, 40px));
@@ -160,7 +134,6 @@ h3 {
 
 #message-container {
   display: inline;
-  /* max-height: 50px; */
   width: 70%;
   font-size: clamp(10px, 4vmin, 20px);
   color: rgb(151, 6, 6);
@@ -179,13 +152,13 @@ h3 {
 
 button {
   max-height: 50px; 
-  margin-top: 0; /* Remove margin-top */
-  margin-bottom: auto; /* Automatically push the buttons to the top */
-  padding: 10px; Set padding for buttons
-  font-size: clamp(12px, 2vmin, 18px); /* Fix the font size function syntax */
-  border-radius: 4px; /* Set border-radius */
-  border: 1px solid grey; /* Add a border to buttons */
-  color: rgb(46, 46, 46); /* Set button text color */
+  margin-top: 0;
+  margin-bottom: auto;
+  padding: 10px;
+  font-size: clamp(12px, 2vmin, 18px); 
+  border-radius: 8px; 
+  border: 1px solid grey; 
+  color: rgb(46, 46, 46);
 }
 
 #complete-letter-exchange-button {
