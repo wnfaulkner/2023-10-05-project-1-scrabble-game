@@ -24,12 +24,12 @@ Standard DOM Architecture:
 
 
 
-## Wireframes
+## Screenshots
 
-![Initialize](./wireframes/0-Initialize.png)
-![Select Letters](./wireframes/1-select-letters.png)
-![First Play](./wireframes/2-first-play.png)
-![Second Play](./wireframes/3-second-play.png)
+![Initialize](./screenshots/Screenshot%201.png)
+![First Play](./screenshots/Screenshot%202.png)
+![Second Play](./screenshots/Screenshot%203.png)
+<!-- ![Win](./screenshots/) -->
 
 
 
