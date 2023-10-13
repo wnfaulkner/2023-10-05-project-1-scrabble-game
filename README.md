@@ -5,8 +5,8 @@ Scrabble is a game that combines vocabulary knowledge, word formation, and strat
 
 ## Screenshots
 <img src="./screenshots/Screenshot%201.png" alt="Game Start" width="500"/>
-<img src="./screenshots/Screenshot%201.png" alt="First Play" width="500"/>
-<img src="./screenshots/Screenshot%201.png" alt="Second Play" width="500"/>
+<img src="./screenshots/Screenshot%202.png" alt="First Play" width="500"/>
+<img src="./screenshots/Screenshot%203.png" alt="Second Play" width="500"/>
 
 ## Tech Stack
 Standard DOM Architecture:
