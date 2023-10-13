@@ -15,23 +15,17 @@ Play the game online at: https://wnfaulkner.github.io/2023-10-05-project-1-scrab
 
 Scrabble involves strategic thinking and word-building skills. Players aim to use high-value letters, take advantage of bonus squares, and create longer words for maximum points.
 
-
-
-## Tech Stack
-Standard DOM Architecture:
-* HTML & CSS for rendering & styling
-* JavaScript for user interactivity, scoring, and win logic
-
-
-
 ## Screenshots
-
+<img src="./screenshots/Screenshot%201.png" alt="Game Start" width="200"/>
 ![Initialize](./screenshots/Screenshot%201.png)
 ![First Play](./screenshots/Screenshot%202.png)
 ![Second Play](./screenshots/Screenshot%203.png)
 <!-- ![Win](./screenshots/) -->
 
-
+## Tech Stack
+Standard DOM Architecture:
+* HTML & CSS for rendering & styling
+* JavaScript for user interactivity, scoring, and win logic
 
 ## MVP Goals
 
