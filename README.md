@@ -78,8 +78,6 @@ Aesthetic Improvements:
     * Display a message congratulating the winner
     * Offer a button to initiate a new game
 
-
-
 ### Planning Materials: Stretch Goals
 
 **Game Setup**
@@ -99,8 +97,6 @@ Aesthetic Improvements:
 
 **Winning Logic**
 * Game automatically checks an official/updated scrabble dictionary using an API
-
-
 
 ### Planning Materials: Potential Roadblocks
 * The play checking logic could get confusing as it will have to recognize which tiles have just been played vs. those that were on the board, check that the new tiles connect with those already played, determine all of the new words formed by the newly played tiles, and check them against a dictionary. I did find .txt versions of the dictionary [here](https://boardgames.stackexchange.com/questions/38366/latest-collins-scrabble-words-list-in-text-file).
