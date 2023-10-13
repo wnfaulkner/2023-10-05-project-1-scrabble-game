@@ -447,9 +447,8 @@
         const checkFirstPlayResult = checkFirstPlay() 
         const checkStraightPlayResult = checkStraightPlay()
         const checkPlayConnectedResult = checkPlayConnected()
-        const checkValidWordsResult = checkValidWords()
         
-        const result = checkFirstPlayResult && checkStraightPlayResult && checkPlayConnectedResult && checkValidWordsResult
+        const result = checkFirstPlayResult && checkStraightPlayResult && checkPlayConnectedResult
 
         return(result)
     }
@@ -498,51 +497,8 @@
         return(result)
     }
 
-    //Checking Validity of New Words Created by the Play
-    function checkValidWords(){
-        const wordsCreatedByPlay = getNewWordsCreatedByPlay()
-
-        return(wordsCreatedByPlay) //! will need updating if can get to dictionary checking
-        // const fs = require('fs');
-
-        // // The string you want to search for
-        // const searchString = 'example';
-        
-        // // Read the JSON file containing the list of words
-        // fs.readFile('wordlist_json.json', 'utf-8', (err, data) => {
-        //   if (err) {
-        //     console.error("Error reading the file:", err);
-        //     return;
-        //   }
-        
-        //   try {
-        //     // Parse the JSON data into a JavaScript object
-        //     const wordList = JSON.parse(data);
-        
-        //     // Check if the searchString exists in the word list
-        //     if (wordList.includes(searchString)) {
-        //       console.log(`'${searchString}' exists in the word list.`);
-        //     } else {
-        //       console.log(`'${searchString}' does not exist in the word list.`);
-        //     }
-        //   } catch (error) {
-        //     console.error("Error parsing JSON:", error);
-        //   }
-        // });
-
-        // const fs = require('fs')
-
-        // fs.readFile('worlist_json.json', function (err, data) {
-        //     if (err) throw err;
-        //     if(data.includes(wordsCreatedByPlay)){
-        //      console.log(data)
-        //     }
-        //   });
-    }
-
- 
-
 //Scoring the Play
+
     function getNewWordsCreatedByPlay(){
         const newHorizontalWords = [...new Set(placedLetters.map(item => getHorizontalWord(item)))]
         const newVerticalWords = [...new Set(placedLetters.map(item => getVerticalWord(item)))]
@@ -558,7 +514,7 @@
         const wordRange = wholeRange.slice(leftEndColIdx, rightEndColIdx + 1) //Method 4 (Weston's suggestion)
 
         if(wordRange.length === 1){return} //guard: should only be able to play 1-letter word on a blank board (first valid play)
-        //turn !== 1 && round !== 1 && 
+       
         const wordBoardCells = wordRange.map(item => [item, rowIdx])
         const word = wordBoardCells.map(item => board[item[0]][item[1]]).join('')
 
@@ -568,8 +524,6 @@
     function getVerticalWord(placedLetter){
         if(turn === 1 && round === 1){return} //guard: no vertical words on first play
         const colIdx = placedLetter.colIdx
-        // const topEndRowIdx = 
-        // const bottomEndRowIdx = 
         const wholeRange = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
         const wordRange = wholeRange.slice(getEndIdx(placedLetter, 'up').rowIdx, getEndIdx(placedLetter, 'down').rowIdx + 1) //Method 4 (Weston's suggestion)
 
@@ -597,7 +551,6 @@
 
         let colIdx = placedLetter.colIdx
         let rowIdx = placedLetter.rowIdx
-        // let lettersToRight = []
         
         while(
             board[colIdx] !== undefined && //colIdx >= 0 && colIdx <= 6 //Ensure that we stay on the board (within bounds)
@@ -606,7 +559,6 @@
         ){
             colIdx += offsets.colOffset
             rowIdx += offsets.rowOffset
-            //console.log(rowIdx, colIdx)
         }
         
         const result = {colIdx, rowIdx}
@@ -657,8 +609,6 @@
         }
 
         renderWinMessage()
-        
-        //console.log(winner)
     }
 
 //Other Functions (often useful in more than one of the above)
@@ -693,45 +643,44 @@
             ]; break;
             
             case 'horizontal':
-            offsets = [ // Define offsets for adjacent cells (left, right)
-                {row: 0, col: -1}, // Left
-                {row: 0, col: 1}   // Right
+            offsets = [ 
+                {row: 0, col: -1}, 
+                {row: 0, col: 1}   
             ]; break;
 
             case 'right':
-            offsets = [ // Define offsets for adjacent cells (left, right)
-                {row: 0, col: 1}   // Right
+            offsets = [ 
+                {row: 0, col: 1}   
             ]; break;
 
             case 'left':
-            offsets = [ // Define offsets for adjacent cells (left, right)
-                {row: 0, col: -1}   // Right
+            offsets = [ 
+                {row: 0, col: -1}  
             ]; break;
          
             case 'vertical':
-            offsets = [ // Define offsets for adjacent cells (up, down)
-                {row: -1, col: 0}, // Up
-                {row: 1, col: 0},  // Down
+            offsets = [ 
+                {row: -1, col: 0}, 
+                {row: 1, col: 0},  
             ]; break;
 
             case 'up':
-            offsets = [ // Define offsets for adjacent cells (left, right)
-                {row: 1, col: 0}   // Right
+            offsets = [ 
+                {row: 1, col: 0}   
             ]; break;
 
             case 'down':
-            offsets = [ // Define offsets for adjacent cells (left, right)
-                {row: -1, col: 0}   // Right
+            offsets = [ 
+                {row: -1, col: 0}   
             ]; break;
 
             default:
-            offsets = [ // Define offsets for adjacent cells (up, down, left, right)
+            offsets = [ 
                 {row: -1, col: 0}, // Up
                 {row: 1, col: 0},  // Down
                 {row: 0, col: -1}, // Left
                 {row: 0, col: 1}   // Right
             ];
-        
         }
 
         const adjacentCells = [] //empty object for storing results of loop
@@ -744,10 +693,8 @@
                 const adjacentCellContents = grid[newCol][newRow]
                 adjacentCells.push({contents: adjacentCellContents, col: newCol, row: newRow});
             }
-            
         }
-        
-
+    
         return adjacentCells;
     }
 
@@ -766,7 +713,6 @@
         }
 
         render()
-        // console.log(turn, round, players, board)
     } 
 
     function delay(milliseconds) {
